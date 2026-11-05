@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BranchMath — Tree Service Bid &amp; Job-Costing</title>
+<style>
+  :root{
+    --ink:#1c2420; --muted:#5c6a62; --line:#d8ded9; --bg:#f4f6f4; --card:#ffffff;
+    --green:#1e6b3c; --green-d:#14522c; --accent:#e8a33d; --red:#b3372e; --blue:#2456a6;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+  header.top{background:var(--green-d);color:#fff;padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+  header.top .logo{font-size:22px;font-weight:800;letter-spacing:.3px}
+  header.top .logo span{color:var(--accent)}
+  header.top .tag{font-size:13px;opacity:.85}
+  header.top .co{margin-left:auto;font-size:13px;text-align:right;opacity:.95}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:4px;background:#fff;border-bottom:1px solid var(--line);padding:8px 12px;position:sticky;top:0;z-index:5}
+  nav.tabs button{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:999px;cursor:pointer;font-size:14px;font-weight:600;color:var(--ink)}
+  nav.tabs button.active{background:var(--green);border-color:var(--green);color:#fff}
+  main{max-width:1020px;margin:0 auto;padding:16px 12px 60px}
+  section.panel{display:none}
+  section.panel.active{display:block}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+  h2{font-size:18px;margin:0 0 10px}
+  h3{font-size:15px;margin:14px 0 8px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 14px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 14px}
+  label.f{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:3px}
+  input[type=text],input[type=number],input[type=date],input[type=tel],input[type=email],select,textarea{
+    width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:7px;font-size:15px;background:#fff;color:var(--ink)}
+  textarea{resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--green);outline-offset:0;border-color:var(--green)}
+  .tree-card{border:1px solid var(--line);border-left:5px solid var(--green);border-radius:8px;padding:12px;margin-bottom:12px;background:#fcfdfc}
+  .tree-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .tree-head .tname{font-weight:700;font-size:15px}
+  .tree-head .tcost{margin-left:auto;font-weight:700;color:var(--green-d);white-space:nowrap}
+  .checks{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px}
+  .checks label{font-size:13.5px;display:flex;align-items:center;gap:5px;cursor:pointer}
+  .checks input{width:16px;height:16px;accent-color:var(--green)}
+  .mult-note{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .tree-photos{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  .tree-thumb-wrap{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+  .tree-thumb{width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+  .tree-thumb-btns{display:flex;gap:4px;flex-wrap:wrap}
+  label.photo-add{display:inline-flex;align-items:center;cursor:pointer}
+  details.tree-more{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
+  details.tree-more summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--green-d);padding:6px 0}
+  .quote-line-flex{display:flex;gap:10px;align-items:flex-start}
+  .quote-photo{width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid var(--line);flex:0 0 auto}
+  .twoquote-note{font-size:12.5px;color:var(--muted)}
+  button.btn{border:none;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:700;cursor:pointer;background:var(--green);color:#fff}
+  button.btn:hover{background:var(--green-d)}
+  button.btn.secondary{background:#fff;color:var(--green-d);border:1.5px solid var(--green)}
+  button.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  button.btn.danger{background:#fff;color:var(--red);border:1px solid var(--red)}
+  button.btn.small{padding:6px 10px;font-size:13px;border-radius:7px;min-height:40px;}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  table.bd{width:100%;border-collapse:collapse;font-size:14.5px}
+  table.bd td{padding:5px 4px;border-bottom:1px dashed var(--line)}
+  table.bd td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.bd tr.sub td{font-weight:700;border-bottom:1px solid var(--line)}
+  table.bd tr.grand td{font-weight:800;font-size:16px;border-bottom:none;color:var(--green-d)}
+  .threenum{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
+  .numbox{border-radius:10px;padding:14px;text-align:center;border:1px solid var(--line);background:#fff}
+  .numbox .lbl{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .numbox .val{font-size:26px;font-weight:800;margin-top:2px}
+  .numbox.rec{border:2px solid var(--green);background:#eef7f0}
+  .numbox.rec .val{color:var(--green-d)}
+  .numbox.prem{border-color:var(--accent);background:#fdf6e7}
+  .saved-item{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#fff}
+  .saved-item .who{font-weight:700}
+  .saved-item .meta{color:var(--muted);font-size:13px}
+  .saved-item .amt{font-weight:800;color:var(--green-d)}
+  .badge{font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px}
+  .badge.open{background:#e7edf5;color:var(--blue)}
+  .badge.won{background:#dff2e2;color:var(--green-d)}
+  .badge.lost{background:#f6e3e1;color:var(--red)}
+  .badge.deposit{background:#fdf6e7;color:#7a5b06}
+  .badge.paidf{background:#dff2e2;color:var(--green-d)}
+  .saved-item .co-line{flex-basis:100%;font-size:13px;color:var(--green-d);font-weight:600}
+  a.btn{display:inline-flex;align-items:center;text-decoration:none;border:none;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:700;cursor:pointer;background:var(--green);color:#fff}
+  a.btn.secondary{background:#fff;color:var(--green-d);border:1.5px solid var(--green)}
+  a.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  table.wave{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+  table.wave th,table.wave td{border:1px solid var(--line);padding:6px 8px;text-align:left}
+  table.wave td.r,table.wave th.r{text-align:right}
+  .switch{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+  .switch input{width:18px;height:18px;accent-color:var(--green)}
+  .hint{font-size:12.5px;color:var(--muted)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50}
+  .toast.show{opacity:1}
+  .demo-warn{background:#fdf0e6;border:2px solid var(--accent);color:#7a3c06;padding:10px 12px;font-size:13.5px;font-weight:700;margin-bottom:12px;border-radius:8px}
+  /* ---------- Quote sheet ---------- */
+  .quote-sheet{background:#fff;border:1px solid var(--line);border-radius:6px;padding:28px;max-width:820px;margin:0 auto}
+  .quote-sheet .qhead{display:flex;justify-content:space-between;gap:16px;border-bottom:3px solid var(--green);padding-bottom:12px;flex-wrap:wrap}
+  .quote-sheet .qco{font-size:22px;font-weight:800;color:var(--green-d)}
+  .quote-sheet .qmeta{font-size:13px;color:var(--muted);text-align:right}
+  .quote-sheet table{width:100%;border-collapse:collapse;margin-top:14px}
+  .quote-sheet th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--line);padding:6px 4px}
+  .quote-sheet td{padding:7px 4px;border-bottom:1px solid #eef1ee;font-size:14px;vertical-align:top}
+  .quote-sheet td.r,.quote-sheet th.r{text-align:right;white-space:nowrap}
+  .quote-sheet .qtotal{font-size:19px;font-weight:800;color:var(--green-d)}
+  .quote-sheet .qterms{margin-top:18px;font-size:12.5px;color:#444;white-space:pre-wrap;border-top:1px solid var(--line);padding-top:10px}
+  #quotePrint{display:none}
+  @media print{
+    body{background:#fff}
+    .app-shell{display:none !important}
+    #quotePrint{display:block !important}
+    .quote-sheet{border:none;border-radius:0;max-width:none;padding:6px}
+  }
+  @media (max-width:560px){
+    .numbox .val{font-size:22px}
+    header.top .co{display:none}
+    .quote-sheet{padding:16px}
+  }
+</style>
+</head>
+<body>
+<div class="app-shell">
+<header class="top">
+  <div class="logo">Branch<span>Math</span></div>
+  <div class="tag">Bid &amp; job-costing for tree services</div>
+  <div class="co" id="headerCompany"></div>
+</header>
+<div style="text-align:center;padding:12px 16px;background:#fff8e6;border-bottom:2px solid #e8a13a;"><a href="https://travisbriggs.gumroad.com/l/treebid-pro" target="_blank" rel="noopener" style="display:inline-block;background:#e8a13a;color:#1d2b2e;font-weight:800;font-size:17px;padding:10px 22px;border-radius:8px;text-decoration:none;">Get the full version — $89</a></div>
+
+
+<nav class="tabs" id="tabNav">
+  <button data-tab="builder" class="active">Bid Builder</button>
+  <button data-tab="saved">Saved Bids</button>
+  <button data-tab="quote">Customer Quote</button>
+  <button data-tab="settings">Business Settings</button>
+  <button data-tab="help">Help / About</button>
+</nav>
+
+<main>
+<!-- ================= BID BUILDER ================= -->
+<section class="panel active" id="panel-builder">
+  <div class="card">
+    <h2>Customer &amp; Job</h2>
+    <div class="grid">
+      <div><label class="f" for="custName">Customer name</label><input type="text" id="custName" placeholder="e.g. Johnson Residence"></div>
+      <div><label class="f" for="custPhone">Customer phone (optional)</label><input type="tel" id="custPhone"></div>
+      <div><label class="f" for="custEmail">Customer email (optional)</label><input type="email" id="custEmail" placeholder="For one-tap Email quote"></div>
+      <div><label class="f" for="custAddr">Job address</label><input type="text" id="custAddr" placeholder="Street, City, ST"></div>
+      <div><label class="f" for="bidDate">Bid date</label><input type="date" id="bidDate"></div>
+    </div>
+    <div class="grid" style="margin-top:10px">
+      <div><label class="f" for="crewSize">Crew size (people on site)</label><input inputmode="decimal" type="number" id="crewSize" min="1" step="1" value="3"></div>
+      <div><label class="f" for="disposal">Disposal method</label>
+        <select id="disposal">
+          <option value="haul">Haul off (dump fees + handling)</option>
+          <option value="chip">Chip on site</option>
+          <option value="leave">Leave on site (no disposal cost)</option>
+        </select>
+        <div class="hint" id="disposalNote"></div>
+      </div>
+      <div><label class="f" for="travelMiles">Travel miles (total, round trip)</label><input inputmode="decimal" type="number" id="travelMiles" min="0" step="1" value="0"></div>
+      <div><label class="f" for="extras">Extra expenses ($ — permits, rentals, etc.)</label><input inputmode="decimal" type="number" id="extras" min="0" step="1" value="0"></div>
+    </div>
+    <div style="margin-top:10px"><label class="f" for="jobNotes">Job notes (shown on quote)</label><textarea id="jobNotes" rows="2" placeholder="Customer-facing notes — these print on the quote."></textarea></div>
+    <div style="margin-top:10px"><label class="f" for="internalNotes">Internal notes (never printed)</label><textarea id="internalNotes" rows="2" placeholder="Private only — gate codes, dogs, payment history. Stored with the bid; never appears on the customer quote."></textarea></div>
+  </div>
+
+  <div class="card">
+    <h2>Trees on This Job</h2>
+    <datalist id="speciesOptions"></datalist>
+    <div id="treeList"></div>
+    <div class="btnrow">
+      <button class="btn secondary" id="addTreeBtn" type="button">+ Add a Tree</button>
+    </div>
+    <p class="hint">Crew time auto-fills from height, diameter and work type — adjust it to match how your crew actually works. Hazard and access multipliers adjust that tree's labor &amp; equipment cost. Add a photo on each tree right here — it saves with the bid and prints on the customer quote beside that tree.</p>
+  </div>
+
+  <div class="card">
+    <h2>Preset Services &amp; Items</h2>
+    <div class="grid2">
+      <div><label class="f" for="presetPick">Add from your rate card</label><select id="presetPick"></select></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn secondary" id="addItemBtn" type="button">+ Add to Bid</button></div>
+    </div>
+    <div id="itemList" style="margin-top:10px"></div>
+    <p class="hint">Presets come from your rate card in Business Settings \u2014 change them there once and every new bid uses your prices. A preset's price flows through the same overhead + margin math as your other costs. Edit the price on a line here to override it for this bid only; the preset itself never changes from here.</p>
+  </div>
+
+  <div class="card">
+    <h2>Pricing Breakdown</h2>
+    <div id="breakdown"></div>
+    <div id="twoQuotes"></div>
+    <div class="threenum">
+      <div class="numbox"><div class="lbl">Break-even</div><div class="val" id="numBreakEven">$0</div><div class="hint">Covers every cost. Below this, you lose money.</div></div>
+      <div class="numbox rec"><div class="lbl">Recommended Bid</div><div class="val" id="numRecommended">$0</div><div class="hint">Break-even + your target profit margin.</div></div>
+      <div class="numbox prem"><div class="lbl">Premium Bid (+15%)</div><div class="val" id="numPremium">$0</div><div class="hint">For rush jobs, difficult clients, or high demand.</div></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="saveBidBtn" type="button">Save This Bid</button>
+      <button class="btn secondary" id="gotoQuoteBtn" type="button">Preview Customer Quote</button>
+      <button class="btn ghost" id="newBidBtn" type="button">Start a New Bid</button>
+    </div>
+    <p class="hint" id="saveHint"></p>
+  </div>
+
+  <div class="card">
+    <h2>Payment Tracking</h2>
+    <div class="grid">
+      <div><label class="f" for="payStatus">Payment status</label>
+        <select id="payStatus">
+          <option value="unpaid">Unpaid</option>
+          <option value="deposit">Deposit paid</option>
+          <option value="paid">Paid in full</option>
+        </select></div>
+      <div><label class="f" for="payMethod">Payment method</label>
+        <select id="payMethod">
+          <option value="">\u2014</option>
+          <option value="wave">Wave</option>
+          <option value="cash">Cash</option>
+          <option value="check">Check</option>
+          <option value="card">Card</option>
+          <option value="other">Other</option>
+        </select></div>
+      <div><label class="f" for="depositAmt">Deposit amount ($)</label><input inputmode="decimal" type="number" id="depositAmt" min="0" step="1" value="0"></div>
+    </div>
+    <p class="hint">Saved with the bid when you hit \u201CSave This Bid.\u201D Updating payment details never changes the bid's saved prices.</p>
+  </div>
+
+  <div class="card">
+    <h2>Job Closeout — Bid vs. Actual</h2>
+    <p class="hint">After the job is done, close it out here: what it really took and what you really collected. BranchMath compares it with this bid — your actual margin and how far the real numbers landed from the bid — and rolls the result into the summary on the Saved Bids tab. It edits this same bid; there is no separate record.</p>
+    <div class="grid">
+      <div><label class="f" for="coHours">Actual crew time (hrs on site)</label><input inputmode="decimal" type="number" id="coHours" min="0" step="0.25" value="0"></div>
+      <div><label class="f" for="coCosts">Actual other costs ($ — disposal, equipment, fuel, rentals)</label><input inputmode="decimal" type="number" id="coCosts" min="0" step="1" value="0"></div>
+      <div><label class="f" for="coCollected">Amount collected ($)</label><input inputmode="decimal" type="number" id="coCollected" min="0" step="1" value="0"></div>
+    </div>
+    <div id="closeoutResults" style="margin-top:10px"></div>
+    <p class="hint">Saved with the bid when you hit “Save This Bid.” Actual labor is figured at your labor rate × crew size × actual hours, and your overhead % is applied the same way as the bid's break-even, so the comparison is apples to apples. Like payment details, closeout numbers never change the bid's saved prices.</p>
+  </div>
+</section>
+
+<!-- ================= SAVED BIDS ================= -->
+<section class="panel" id="panel-saved">
+  <div class="card">
+    <h2>Saved Bids</h2>
+    <div class="grid2" style="margin-bottom:10px">
+      <div><label class="f" for="savedFilter">Filter</label>
+        <select id="savedFilter">
+          <option value="all">All bids</option>
+          <option value="open">Open</option>
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+        </select>
+      </div>
+      <div><label class="f">Pipeline summary</label><div id="savedSummary" style="font-size:14px;padding-top:6px"></div></div>
+    </div>
+    <div id="savedList"></div>
+  </div>
+</section>
+
+<!-- ================= QUOTE ================= -->
+<section class="panel" id="panel-quote">
+  <div class="btnrow" style="margin-bottom:12px">
+    <button class="btn" id="printQuoteBtn" type="button">Print / Save as PDF</button>
+    <button class="btn ghost" id="backToBuilderBtn" type="button">Back to Bid Builder</button>
+  </div>
+  <div id="quotePreview"></div>
+  <div class="card" style="margin-top:14px">
+    <h2>Send This Quote</h2>
+    <p class="hint">Sending goes through <strong>your own</strong> email, text, or WhatsApp app \u2014 BranchMath just prepares the message with your company name, the itemized lines, and the total. Nothing is sent from inside BranchMath, and saved bids send at their frozen snapshot prices.</p>
+    <div class="btnrow">
+      <a class="btn" id="sendEmailBtn" href="#">\u2709 Email quote</a>
+      <a class="btn secondary" id="sendSmsBtn" href="#">\uD83D\uDCAC Text quote</a>
+      <a class="btn secondary" id="sendWaBtn" href="#" target="_blank" rel="noopener">WhatsApp</a>
+      <button class="btn ghost" id="copyQuoteBtn" type="button">Copy quote text</button>
+    </div>
+    <p class="hint" id="sendHint"></p>
+    <h3>Invoice with Wave</h3>
+    <p class="hint"><strong>Open-and-paste handoff \u2014 not a live sync.</strong> BranchMath can't connect to your Wave account directly (this file works fully offline, so there's no API connection). Copy the invoice lines below, open Wave, start a new invoice, and paste them in \u2014 item names, quantities, and prices match this quote exactly.</p>
+    <div id="waveBox"></div>
+    <div class="btnrow">
+      <button class="btn secondary" id="copyWaveBtn" type="button">Copy invoice lines for Wave</button>
+      <a class="btn ghost" href="https://my.waveapps.com" target="_blank" rel="noopener">Open Wave</a>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <label class="f" for="quoteTerms">Quote terms (prints on the quote sheet)</label>
+    <textarea id="quoteTerms" rows="5"></textarea>
+    <p class="hint">Edit these to match your business — deposit, payment timing, cleanup, stump policy. Saved with each bid.</p>
+  </div>
+</section>
+
+<!-- ================= SETTINGS ================= -->
+<section class="panel" id="panel-settings">
+  <div class="card">
+    <h2>Business Settings</h2>
+    <p class="hint">These print on every quote and drive the pricing math. Change them once — every new bid uses them. Settings save automatically on this device.</p>
+    <div class="grid">
+      <div><label class="f" for="setCompany">Company name</label><input type="text" id="setCompany" placeholder="Your Company"></div>
+      <div><label class="f" for="setPhone">Company phone</label><input type="tel" id="setPhone"></div>
+      <div><label class="f" for="setEmail">Company email</label><input type="email" id="setEmail"></div>
+    </div>
+    <h3>Your Rates &amp; Margins</h3>
+    <div class="grid">
+      <div><label class="f" for="setLabor">Labor rate ($ per person, per hour)</label><input inputmode="decimal" type="number" id="setLabor" min="0" step="1"></div>
+      <div><label class="f" for="setEquip">Equipment rate ($ per crew hour)</label><input inputmode="decimal" type="number" id="setEquip" min="0" step="1"></div>
+      <div><label class="f" for="setOverhead">Overhead (%)</label><input inputmode="decimal" type="number" id="setOverhead" min="0" max="90" step="1"></div>
+      <div><label class="f" for="setMargin">Target profit margin (%)</label><input inputmode="decimal" type="number" id="setMargin" min="0" max="90" step="1"></div>
+      <div><label class="f" for="setTravel">Travel rate ($ per mile)</label><input inputmode="decimal" type="number" id="setTravel" min="0" step="0.05"></div>
+    </div>
+    <h3>Sales Tax</h3>
+    <label class="switch"><input type="checkbox" id="setTaxOn"> Charge sales tax on quotes</label>
+    <div class="grid" style="margin-top:8px;max-width:260px">
+      <div><label class="f" for="setTaxRate">Tax rate (%)</label><input inputmode="decimal" type="number" id="setTaxRate" min="0" step="0.1"></div>
+    </div>
+    <p class="hint">Off by default — tree work labor is not taxable in Oklahoma. Turn it on only if your state or the specific work (e.g. selling firewood or materials) requires it. When on, tax is added on top of the bid and shown as its own line.</p>
+    <h3>Disposal Pricing (built into the math)</h3>
+    <div class="grid">
+      <div><label class="f" for="setHaulBase">Haul-off base fee ($ per job)</label><input inputmode="decimal" type="number" id="setHaulBase" min="0" step="5"></div>
+      <div><label class="f" for="setHaulRemoval">Haul-off per removal tree ($)</label><input inputmode="decimal" type="number" id="setHaulRemoval" min="0" step="5"></div>
+      <div><label class="f" for="setChipFee">Chip-on-site fee ($ per job)</label><input inputmode="decimal" type="number" id="setChipFee" min="0" step="5"></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="saveSettingsBtn" type="button">Save Settings</button>
+      <button class="btn ghost" id="resetSettingsBtn" type="button">Reset to Defaults</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Preset Services &amp; Items \u2014 Your Rate Card</h2>
+    <p class="hint">Every preset price is yours to change. Edits save automatically on this device and apply to <strong>new</strong> bids \u2014 bids you already saved keep the prices frozen in their snapshot, even if you change a preset later. A price can still be overridden on an individual bid without touching the preset.</p>
+    <div id="presetList"></div>
+    <h3>Add a custom item</h3>
+    <div class="grid2">
+      <div><label class="f" for="newPresetName">Item name</label><input type="text" id="newPresetName" placeholder="e.g. Crane assist"></div>
+      <div><label class="f" for="newPresetPrice">Price ($)</label><input inputmode="decimal" type="number" id="newPresetPrice" min="0" step="1" placeholder="0"></div>
+    </div>
+    <div class="btnrow"><button class="btn secondary" id="addPresetBtn" type="button">+ Add Custom Item</button></div>
+  </div>
+  <div class="card">
+    <h2>Your Data</h2>
+    <p class="hint">Everything is stored in this browser on this device (localStorage). Nothing is sent anywhere. Export a backup (JSON) regularly — that file is the one you can restore from with Import backup if you clear browser data or switch devices.</p>
+    <div class="btnrow">
+      <button class="btn secondary" id="exportBackupBtn" type="button">Export backup (JSON)</button>
+      <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Import backup<input id="importFile" type="file" accept=".json,application/json" style="display:none"></label>
+    </div>
+    <p class="hint" id="backupMsg"></p>
+    <div class="btnrow">
+      <button class="btn danger" id="wipeBtn" type="button">Erase All Saved Bids &amp; Settings</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HELP ================= -->
+<section class="panel" id="panel-help">
+  <div class="card">
+    <h2>How to Use BranchMath</h2>
+    <ol>
+      <li><strong>Set up once.</strong> Go to Business Settings and enter your company info, your real labor and equipment rates, overhead, and the profit margin you want. The defaults are sensible starting points for a small (2–4 person) tree service — tune them to your actual costs.</li>
+      <li><strong>Build the bid.</strong> Enter the customer and job details, then add one entry per tree. Crew time auto-fills from the tree's size and work type; adjust it to match your crew. Tick the hazard boxes that apply (dead, leaning, near a structure, near power lines) and set access difficulty — each one raises that tree's cost by a fair multiplier instead of you guessing a pad number.</li>
+      <li><strong>Trust the three numbers.</strong> <em>Break-even</em> is what the job costs you, all-in. Never bid below it. <em>Recommended</em> adds your target profit margin — that's your normal bid. <em>Premium</em> (+15%) is for rush work or when you're booked out and the job has to be worth displacing another.</li>
+      <li><strong>Save every bid.</strong> Saved bids live on the Saved Bids tab. Mark them Won or Lost as you hear back — over a season, your win rate at your recommended price tells you whether your margin is right.</li>
+      <li><strong>Send the quote.</strong> The Customer Quote tab turns the current bid into a clean sheet with your company info, per-tree line items, the total, and your terms. Print it or save it as a PDF and hand/send it to the customer.</li>
+      <li><strong>Send it in one tap.</strong> Add the customer's phone and email in the Bid Builder, then use Send on a saved bid (or the Send card on the Customer Quote tab): Email, Text, and WhatsApp open in your own apps with the itemized quote already written; Copy quote text pastes anywhere. Saved bids always send at their frozen snapshot prices.</li>
+      <li><strong>Invoice with Wave.</strong> The Wave card on the Customer Quote tab shows the quote as invoice lines (item, qty, price). Copy them, open Wave, and paste them into a new invoice \u2014 an open-and-paste handoff, not a live sync: this file works offline and never connects to your Wave account. Track the result back in the Bid Builder's Payment Tracking card (status, method, deposit).</li>
+      <li><strong>Your rate card.</strong> Business Settings holds your preset services &amp; items with your own prices (plus any custom items you add). New bids pick them up from the Preset Services &amp; Items card; override a price on a single bid without changing the preset. Changing a preset never reprices a bid you already saved.</li>
+      <li><strong>A photo for each tree.</strong> On each tree entry, tap <em>Add a photo</em> to take or pick a photo of that tree — add as many as you need, remove or replace one with a tap. Photos are shrunk on your device, saved with the bid, and printed on the customer quote beside that tree's line so you (and the customer) know exactly which tree is which. Filling in <em>Where on the property</em>, stump and wood choices, the landing / drop zone, and a one-line note (under <em>More details</em>) makes the quote clearer still.</li>
+      <li><strong>Two figures, kept separate.</strong> Each tree shows <em>This tree by itself</em> — just that tree's labor and equipment at your rates with its difficulty multipliers, no disposal, travel, extras, or overhead. The <em>Whole job, everything in</em> figures in the Pricing Breakdown are the full job the way BranchMath has always figured it: every tree plus disposal, travel, extras, overhead, and your margin (break-even / recommended / premium).</li>
+      <li><strong>Close out every finished job.</strong> Open the saved bid, scroll to <em>Job Closeout — Bid vs. Actual</em>, and enter the actual crew time, your actual other costs (disposal, equipment, fuel, rentals), and the amount you collected. BranchMath figures your actual margin and shows how the real hours and costs landed against the bid — and the Saved Bids summary rolls every closed-out job into one real-margin figure, so you can see what your bids actually finished at.</li>
+    </ol>
+    <h3>How the math works</h3>
+    <p>Per tree: crew time × crew size × labor rate, plus crew time × equipment rate — then multiplied by that tree's hazard and access multipliers. Add disposal, travel (miles × your per-mile rate), and extras for the direct cost. Overhead % goes on top of direct cost to get your <strong>break-even</strong>. The recommended bid divides break-even by (1 − margin), which is true margin math (not a markup), so a 25% margin really is 25% profit in the price. Premium is recommended × 1.15. If sales tax is on, it's added on top and shown separately. Closeout math: actual labor is actual crew hours × crew size × your labor rate; add your actual other costs for the actual direct cost, apply the same overhead % for the fully loaded actual cost, and the actual margin is (amount collected − actual cost) ÷ amount collected.</p>
+    <h3>About</h3>
+    <p>BranchMath is a single-file tool: it runs entirely in your browser, works offline, and stores your data only on your device. Your rates and bids are your business — they never leave your phone or computer.</p>
+    <p><strong>Looking for more tree jobs?</strong> <a href="https://whitewolfoklahoma-rgb.github.io/treefinder-share/" target="_blank" rel="noopener">Get tree jobs through TreeFinder</a> — list your tree service free, see local homeowner job requests, and pay nothing unless a job books and pays.</p>
+    <p><strong>Looking for more tree jobs?</strong> <a href="https://whitewolfoklahoma-rgb.github.io/treefinder-share/" target="_blank" rel="noopener">Get tree jobs through TreeFinder</a> — list your tree service free, see local homeowner job requests, and pay nothing unless a job books and pays.</p>
+    <p class="hint">Estimates only: BranchMath helps you price consistently, but site conditions, your judgment, and your local market make the final call. Always verify a bid before you send it.</p>
+    <p><strong>BranchMath v1.2</strong></p>
+    <p>Questions or trouble? <a class="btn" id="helpEmailBtn" href="mailto:whitewolfbackoffice@gmail.com?subject=BranchMath%20help%20%E2%80%94%20v1.2&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A">Email us</a></p>
+    <p class="hint">Photo analysis by AI is planned for a future connected edition of BranchMath — it is not available in this offline version, and nothing in this version analyzes your photos.</p>
+  </div>
+</section>
+</main>
+</div><!-- /app-shell -->
+
+<div id="quotePrint"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================== DATA ============================== */
+var APP_VERSION = "1.2";
+var LS_SETTINGS = "treebidpro_settings_v1";
+var LS_BIDS = "treebidpro_bids_v1";
+
+var DEFAULT_PRESETS = [
+  { id: "p_limb",       name: "Limb removal",                          price: 175 },
+  { id: "p_removal_s",  name: "Small tree removal (under 30 ft)",      price: 450 },
+  { id: "p_removal_m",  name: "Medium tree removal (30-60 ft)",        price: 850 },
+  { id: "p_removal_l",  name: "Large tree removal (over 60 ft)",        price: 1450 },
+  { id: "p_stump",      name: "Stump grinding (per stump)",            price: 150 },
+  { id: "p_haul",       name: "Haul-away debris (per load)",           price: 225 },
+  { id: "p_cleanup",    name: "Cleanup & rake-out",                    price: 120 },
+  { id: "p_storm",      name: "Storm / emergency call-out",            price: 250 }
+];
+function sanitizePresets(list) {
+  if (!Array.isArray(list)) return JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+  return list.filter(function (x) { return x && typeof x === "object"; }).map(function (x, i) {
+    return { id: x.id ? String(x.id) : "p_custom_" + i, name: String(x.name == null ? "" : x.name),
+             price: Math.max(0, (function (n) { return isFinite(n) ? n : 0; })(parseFloat(x.price))) };
+  });
+}
+
+var DEFAULT_SETTINGS = {
+  company: "",
+  phone: "",
+  email: "",
+  laborRate: 45,      /* $ per person per hour */
+  equipRate: 35,      /* $ per crew hour: saws, chipper, truck, fuel, wear */
+  overheadPct: 12,    /* insurance, licenses, admin, maintenance */
+  marginPct: 25,      /* target profit margin on the bid */
+  travelRate: 1.85,   /* $ per mile, truck + crew time */
+  taxEnabled: false,  /* tree work labor is not taxable in OK */
+  taxRate: 8.5,
+  haulBase: 150,      /* haul-off: base per job */
+  haulPerRemoval: 75, /* haul-off: per removal tree */
+  chipFee: 60         /* chip on site: flat per job */
+};
+DEFAULT_SETTINGS.presets = DEFAULT_PRESETS;
+
+var HAZARDS = [
+  { key: "dead",      label: "Dead / declining", mult: 1.25 },
+  { key: "leaning",   label: "Leaning",          mult: 1.20 },
+  { key: "structure", label: "Near structure",   mult: 1.30 },
+  { key: "power",     label: "Near power lines", mult: 1.40 }
+];
+var ACCESS = { easy: 0.90, standard: 1.00, hard: 1.30 };
+var WORK_LABELS = { removal: "Removal", trim: "Trim", prune: "Prune", stump: "Stump grinding" };
+var DISPOSAL_LABELS = { haul: "Haul off", chip: "Chip on site", leave: "Leave on site" };
+var STUMP_LABELS = { grind: "Grind stump", leave: "Leave stump", none: "No stump work" };
+var STUMP_VALUES = ["grind", "leave", "none"];
+var LANDING_LABELS = { none: "None", tight: "Tight", "5": "~5 ft", "10": "~10 ft", "20plus": "~20 ft+" };
+var LANDING_VALUES = ["none", "tight", "5", "10", "20plus"];
+var WOOD_VALUES = ["", "haul", "leave"];
+var COMMON_SPECIES = ["Oak", "Pine", "Maple", "Cedar", "Pecan", "Elm", "Hackberry", "Cottonwood", "Bradford Pear", "Sweetgum", "Unknown"];
+function stumpLabel(v) { return STUMP_LABELS[v] || STUMP_LABELS.none; }
+function landingLabel(v) { return LANDING_LABELS[v] || LANDING_LABELS.none; }
+function woodLabelFor(t, bid) {
+  if (t.wood === "haul") return "Haul off";
+  if (t.wood === "leave") return "Leave for customer";
+  if (bid && bid.disposal === "haul") return "Haul off (job default)";
+  if (bid && bid.disposal === "chip") return "Chip on site (job default)";
+  return "Leave for customer (job default)";
+}
+
+var DEFAULT_TERMS = "Quote valid for 30 days. Price includes the work listed above only; additional work will be quoted separately. Stump grinding is included only where listed. Payment due in full on completion unless other arrangements are made in writing before work begins. We are not responsible for damage to underground utilities, irrigation, or septic systems not marked by the property owner before work begins.";
+
+function blankTree() {
+  return { species: "", height: 40, diameter: 18, work: "removal",
+           hazards: { dead: false, leaning: false, structure: false, power: false },
+           access: "standard", hours: 3,
+           location: "", stump: "none", wood: "", note: "", landing: "none", photos: [] };
+}
+function suggestedHours(t) {
+  var h = parseFloat(t.height) || 0, d = parseFloat(t.diameter) || 0, raw;
+  if (t.work === "removal") raw = 1 + h / 25 + d / 12;
+  else if (t.work === "trim") raw = 0.75 + h / 30 + d / 40;
+  else if (t.work === "prune") raw = 0.5 + h / 40 + d / 50;
+  else raw = 0.5 + d / 18; /* stump */
+  return Math.max(0.25, Math.round(raw * 4) / 4);
+}
+function hazardMult(t) {
+  var m = 1;
+  HAZARDS.forEach(function (hz) { if (t.hazards && t.hazards[hz.key]) m *= hz.mult; });
+  return m;
+}
+function treeMult(t) { return hazardMult(t) * (ACCESS[t.access] || 1); }
+
+function num(v, fallback) { var n = parseFloat(v); return isNaN(n) ? (fallback || 0) : n; }
+function money(v) { return "$" + (Math.round(v * 100) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function uid() { return "b" + Date.now().toString(36) + Math.floor(Math.random() * 9999).toString(36); }
+function todayStr() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+</script>
+
+<script>
+"use strict";
+/* ============================== STATE ============================== */
+var settings = loadSettings();
+var bids = loadBids();
+var current = null; /* the bid being edited */
+
+function loadSettings() {
+  var out = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  try {
+    var raw = localStorage.getItem(LS_SETTINGS);
+    if (raw) {
+      var s = JSON.parse(raw);
+      ["company", "phone", "email"].forEach(function (k) { if (s[k] !== undefined && s[k] !== null) out[k] = String(s[k]); });
+      ["laborRate", "equipRate", "overheadPct", "marginPct", "travelRate", "taxRate", "haulBase", "haulPerRemoval", "chipFee"].forEach(function (k) {
+        if (s[k] !== undefined) { var n = parseFloat(s[k]); if (isFinite(n)) out[k] = Math.max(0, n); }
+      });
+      out.overheadPct = Math.min(90, out.overheadPct);
+      out.marginPct = Math.min(90, out.marginPct);
+      if (s.taxEnabled !== undefined) out.taxEnabled = !!s.taxEnabled;
+      if (s.presets !== undefined) out.presets = sanitizePresets(s.presets);
+      if (s.legal !== undefined) out.legal = s.legal;
+    }
+  } catch (e) {}
+  return out;
+}
+function saveSettings() { try { localStorage.setItem(LS_SETTINGS, JSON.stringify(settings)); } catch (e) {} }
+function loadBids() {
+  try { var raw = localStorage.getItem(LS_BIDS); if (raw) { var b = JSON.parse(raw); if (Array.isArray(b)) return b.map(normalizeBid).filter(function (x) { return x !== null; }); } } catch (e) {}
+  return [];
+}
+/* Drop or repair malformed records so one bad entry can never crash the app. */
+function normalizeBid(b) {
+  if (!b || typeof b !== "object") return null;
+  if (!Array.isArray(b.trees)) b.trees = [];
+  b.trees = b.trees.map(function (t) {
+    if (!t || typeof t !== "object") return blankTree();
+    if (!t.hazards || typeof t.hazards !== "object") t.hazards = { dead: false, leaning: false, structure: false, power: false };
+    if (!WORK_LABELS[t.work]) t.work = "removal";
+    if (!ACCESS[t.access]) t.access = "standard";
+    if (typeof t.species !== "string") t.species = t.species == null ? "" : String(t.species);
+    if (typeof t.location !== "string") t.location = t.location == null ? "" : String(t.location);
+    if (STUMP_VALUES.indexOf(t.stump) < 0) t.stump = "none";
+    if (WOOD_VALUES.indexOf(t.wood) < 0) t.wood = "";
+    if (typeof t.note !== "string") t.note = t.note == null ? "" : String(t.note);
+    if (LANDING_VALUES.indexOf(t.landing) < 0) t.landing = "none";
+    if (!Array.isArray(t.photos)) t.photos = [];
+    t.photos = t.photos.filter(function (ph) { return typeof ph === "string" && ph.indexOf("data:image/") === 0; });
+    return t;
+  });
+  if (["open", "won", "lost"].indexOf(b.status) < 0) b.status = "open";
+  if (typeof b.notes !== "string") b.notes = b.notes == null ? "" : String(b.notes);
+  if (typeof b.internalNotes !== "string") b.internalNotes = b.internalNotes == null ? "" : String(b.internalNotes);
+  if (b.snapshot !== undefined && (!b.snapshot || typeof b.snapshot !== "object" || !Array.isArray(b.snapshot.lines))) delete b.snapshot;
+  if (typeof b.email !== "string") b.email = b.email == null ? "" : String(b.email);
+  if (!Array.isArray(b.items)) b.items = [];
+  b.items = b.items.filter(function (it) { return it && typeof it === "object"; }).map(function (it) {
+    return { name: String(it.name == null ? "Item" : it.name), qty: Math.max(0, num(it.qty, 1)), price: Math.max(0, num(it.price)) };
+  });
+  if (["unpaid", "deposit", "paid"].indexOf(b.payStatus) < 0) b.payStatus = "unpaid";
+  if (["", "wave", "cash", "check", "card", "other"].indexOf(b.payMethod) < 0) b.payMethod = "";
+  b.depositAmt = Math.max(0, num(b.depositAmt));
+  if (b.closeout !== undefined && b.closeout !== null) {
+    if (typeof b.closeout !== "object") delete b.closeout;
+    else {
+      var co = b.closeout;
+      co.actualHours = Math.max(0, num(co.actualHours));
+      co.actualCosts = Math.max(0, num(co.actualCosts));
+      co.collected = Math.max(0, num(co.collected));
+      if (typeof co.closedAt !== "string") co.closedAt = co.closedAt == null ? "" : String(co.closedAt);
+      if (co.calc !== undefined && (!co.calc || typeof co.calc !== "object")) delete co.calc;
+      if (co.calc) {
+        ["laborRate", "overheadPct", "crewSize", "bidHours", "bidBreakEven", "bidPrice", "actualLabor", "actualDirect", "actualCost", "actualProfit", "actualMarginPct"].forEach(function (k) { co.calc[k] = num(co.calc[k]); });
+      }
+    }
+  }
+  return b;
+}
+function persistBids() { try { localStorage.setItem(LS_BIDS, JSON.stringify(bids)); } catch (e) {} }
+
+function exampleBid() {
+  var t1 = blankTree();
+  t1.species = "Oak"; t1.height = 65; t1.diameter = 28; t1.work = "removal";
+  t1.hazards.dead = true; t1.hazards.structure = true; t1.access = "standard"; t1.hours = suggestedHours(t1);
+  var t2 = blankTree();
+  t2.species = "Maple"; t2.height = 40; t2.diameter = 18; t2.work = "trim";
+  t2.access = "easy"; t2.hours = suggestedHours(t2);
+  return { id: uid(), customer: "Example — Johnson Residence", phone: "", email: "", address: "1234 S Main St, Cedar Hollow, OK",
+           date: todayStr(), crewSize: 3, disposal: "haul", travelMiles: 24, extras: 0,
+           notes: "Dead oak overhanging the roof on the west side. Gate access on the south fence.",
+           internalNotes: "Example internal note — the customer never sees this.", 
+           terms: DEFAULT_TERMS, status: "open", items: [], payStatus: "unpaid", payMethod: "", depositAmt: 0, trees: [t1, t2] };
+}
+function blankBid() {
+  return { id: null, customer: "", phone: "", email: "", address: "", date: todayStr(), crewSize: 3,
+           disposal: "haul", travelMiles: 0, extras: 0, notes: "", internalNotes: "", terms: DEFAULT_TERMS,
+           status: "open", items: [], payStatus: "unpaid", payMethod: "", depositAmt: 0, closeout: null, trees: [blankTree()] };
+}
+
+/* ============================== PRICING ENGINE ============================== */
+function disposalCost(bid, s) {
+  if (!bid.trees.length) return 0;
+  if (bid.disposal === "haul") {
+    var removals = bid.trees.filter(function (t) { return t.work === "removal"; }).length;
+    return s.haulBase + s.haulPerRemoval * removals;
+  }
+  if (bid.disposal === "chip") return s.chipFee;
+  return 0;
+}
+function calcBid(bid, s) {
+  var crew = Math.max(1, num(bid.crewSize, 1));
+  var treeLines = [], laborTotal = 0, equipTotal = 0;
+  bid.trees.forEach(function (t, i) {
+    var time = Math.max(0, num(t.hours));
+    var mult = treeMult(t);
+    var labor = time * crew * s.laborRate * mult;
+    var equip = time * s.equipRate * mult;
+    laborTotal += labor; equipTotal += equip;
+    treeLines.push({ idx: i, tree: t, time: time, mult: mult, labor: labor, equip: equip, cost: labor + equip });
+  });
+  var disposal = disposalCost(bid, s);
+  var travel = Math.max(0, num(bid.travelMiles)) * s.travelRate;
+  var extras = Math.max(0, num(bid.extras));
+  var itemsTotal = (bid.items || []).reduce(function (a, it) { return a + Math.max(0, num(it.qty, 1)) * Math.max(0, num(it.price)); }, 0);
+  var direct = laborTotal + equipTotal + disposal + travel + extras + itemsTotal;
+  var overheadAmt = direct * (num(s.overheadPct) / 100);
+  var breakEven = direct + overheadAmt;
+  var margin = Math.min(90, Math.max(0, num(s.marginPct)));
+  var recommended = breakEven / (1 - margin / 100);
+  var premium = recommended * 1.15;
+  var taxAmt = s.taxEnabled ? recommended * (num(s.taxRate) / 100) : 0;
+  return { treeLines: treeLines, laborTotal: laborTotal, equipTotal: equipTotal, disposal: disposal,
+           travel: travel, extras: extras, itemsTotal: itemsTotal, direct: direct, overheadAmt: overheadAmt,
+           breakEven: breakEven, recommended: recommended, premium: premium,
+           taxAmt: taxAmt, totalWithTax: recommended + taxAmt };
+}
+/* Quote line items: scale direct-cost lines up to the recommended bid so lines sum to the total. */
+function quoteLines(bid, s, calc) {
+  var lines = [];
+  var scale = calc.direct > 0 ? calc.recommended / calc.direct : 0;
+  calc.treeLines.forEach(function (tl) {
+    var t = tl.tree;
+    var desc = (t.species ? esc(t.species) + " — " : "") + WORK_LABELS[t.work];
+    var detail = [];
+    if (num(t.height)) detail.push(num(t.height) + " ft tall");
+    if (num(t.diameter)) detail.push(num(t.diameter) + " in trunk");
+    var hz = HAZARDS.filter(function (h) { return t.hazards && t.hazards[h.key]; }).map(function (h) { return h.label.toLowerCase(); });
+    if (hz.length) detail.push(hz.join(", "));
+    detail.push("access: " + t.access);
+    if (t.location) detail.push("where: " + t.location);
+    detail.push("stump: " + stumpLabel(t.stump).toLowerCase());
+    detail.push("wood: " + woodLabelFor(t, bid));
+    detail.push("landing zone: " + landingLabel(t.landing));
+    if (t.note) detail.push("note: " + t.note);
+    var photos = (Array.isArray(t.photos) ? t.photos.filter(function (ph) { return typeof ph === "string"; }) : []);
+    lines.push({ desc: desc, detail: detail.join(" · "), amount: tl.cost * scale,
+                 photo: photos.length ? photos[0] : "", photos: photos });
+  });
+  if (calc.disposal > 0) lines.push({ desc: "Disposal — " + DISPOSAL_LABELS[bid.disposal], detail: "", amount: calc.disposal * scale });
+  if (calc.travel > 0) lines.push({ desc: "Travel (" + num(bid.travelMiles) + " mi)", detail: "", amount: calc.travel * scale });
+  if (calc.extras > 0) lines.push({ desc: "Additional expenses", detail: "", amount: calc.extras * scale });
+  (bid.items || []).forEach(function (it) {
+    var amt = Math.max(0, num(it.qty, 1)) * Math.max(0, num(it.price));
+    if (amt > 0) lines.push({ desc: esc(it.name || "Item"), detail: num(it.qty, 1) + " \u00D7 " + money(num(it.price)), amount: amt * scale });
+  });
+  /* fix rounding drift on the last line so lines sum exactly to the recommended bid */
+  if (lines.length) {
+    var sum = lines.reduce(function (a, l) { return a + l.amount; }, 0);
+    lines[lines.length - 1].amount += (calc.recommended - sum);
+  }
+  return lines;
+}
+/* Price snapshot frozen at save time: reprinting a saved bid uses these
+   exact lines/totals/company, never today's settings. */
+function buildSnapshot(bid, s) {
+  var calc = calcBid(bid, s);
+  var lines = quoteLines(bid, s, calc);
+  return { lines: lines.map(function (l) { return { desc: l.desc, detail: l.detail, amount: Math.round(l.amount * 100) / 100,
+             photo: l.photo || "", photos: Array.isArray(l.photos) ? l.photos.slice() : [] }; }),
+           recommended: Math.round(calc.recommended * 100) / 100,
+           taxAmt: Math.round(calc.taxAmt * 100) / 100,
+           totalWithTax: Math.round(calc.totalWithTax * 100) / 100,
+           taxEnabled: !!s.taxEnabled, taxRate: num(s.taxRate),
+           company: s.company || "", phone: s.phone || "", email: s.email || "",
+           savedAt: new Date().toISOString() };
+}
+/* ---------- Bid-vs-actual closeout ----------
+   One closeout lives ON the bid record (no separate record): the three
+   actuals the user enters, plus a calc frozen at save time (rates and bid
+   baseline captured then), so saved results never drift when rates change. */
+function bidHoursTotal(bid) {
+  return (bid.trees || []).reduce(function (a, t) { return a + Math.max(0, num(t.hours)); }, 0);
+}
+function calcCloseout(bid, s, co) {
+  var crew = Math.max(1, num(bid.crewSize, 1));
+  var laborRate = num(s.laborRate), overheadPct = Math.min(90, Math.max(0, num(s.overheadPct)));
+  var bcalc = calcBid(bid, s);
+  var actualLabor = Math.max(0, num(co.actualHours)) * crew * laborRate;
+  var actualDirect = actualLabor + Math.max(0, num(co.actualCosts));
+  var actualCost = actualDirect * (1 + overheadPct / 100);
+  var collected = Math.max(0, num(co.collected));
+  var actualProfit = collected - actualCost;
+  return { laborRate: laborRate, overheadPct: overheadPct, crewSize: crew,
+           bidHours: bidHoursTotal(bid), bidBreakEven: bcalc.breakEven, bidPrice: bcalc.totalWithTax,
+           actualLabor: actualLabor, actualDirect: actualDirect, actualCost: actualCost,
+           actualProfit: actualProfit,
+           actualMarginPct: collected > 0 ? (actualProfit / collected) * 100 : 0 };
+}
+/* Display numbers for a saved bid's closeout: the frozen calc when present;
+   a live recompute only for records carrying inputs but no calc (e.g. a
+   backup written before calcs were frozen). */
+function closeoutCalcFor(bid, s) {
+  var co = bid.closeout;
+  if (!co || typeof co !== "object") return null;
+  if (!(num(co.actualHours) > 0 || num(co.actualCosts) > 0 || num(co.collected) > 0)) return null;
+  if (co.calc && typeof co.calc === "object") return co.calc;
+  return calcCloseout(bid, s, co);
+}
+function closeoutSummaryText(bid, s) {
+  var co = bid.closeout, cc = closeoutCalcFor(bid, s);
+  if (!co || !cc) return "";
+  var costVar = cc.actualCost - cc.bidBreakEven;
+  return "Closed out: " + (Math.round(num(co.actualHours) * 100) / 100) + " hrs actual · collected " + money(num(co.collected)) +
+    " · actual margin " + (num(co.collected) > 0 ? cc.actualMarginPct.toFixed(1) + "%" : "—") +
+    " · cost " + (costVar >= 0 ? "+" : "-") + money(Math.abs(costVar)) + " vs bid break-even";
+}
+function companyIsPlaceholder(name) {
+  var t = String(name == null ? "" : name).trim();
+  return t === "" || t === "Your Company";
+}
+/* ---------- Photo pipeline: downscale + compress on-device before save ----------
+   Longest edge capped at ~1280px; JPEG quality (then size) stepped down until
+   the stored data URL is <= ~350 KB, so localStorage stays viable. */
+function photoApproxBytes(dataUrl) {
+  var comma = dataUrl.indexOf(",");
+  if (comma < 0) return dataUrl.length;
+  return Math.floor((dataUrl.length - comma - 1) * 3 / 4);
+}
+function canvasToTargetJpeg(canvas) {
+  var qualities = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.18];
+  var cur = canvas;
+  for (var attempt = 0; attempt < 6; attempt++) {
+    for (var q = 0; q < qualities.length; q++) {
+      var url = cur.toDataURL("image/jpeg", qualities[q]);
+      if (photoApproxBytes(url) <= 350 * 1024) return url;
+      if (q === qualities.length - 1 && attempt === 5) return url;
+    }
+    var next = document.createElement("canvas");
+    next.width = Math.max(1, Math.floor(cur.width * 0.8));
+    next.height = Math.max(1, Math.floor(cur.height * 0.8));
+    next.getContext("2d").drawImage(cur, 0, 0, next.width, next.height);
+    cur = next;
+  }
+  return cur.toDataURL("image/jpeg", 0.18);
+}
+function compressPhotoFile(file, cb) {
+  var objUrl = null;
+  try { objUrl = URL.createObjectURL(file); } catch (e) { cb(null); return; }
+  var img = new Image();
+  img.onload = function () {
+    try {
+      var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      if (!w || !h) { URL.revokeObjectURL(objUrl); cb(null); return; }
+      var scale = Math.min(1, 1280 / Math.max(w, h));
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(w * scale));
+      canvas.height = Math.max(1, Math.round(h * scale));
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(objUrl);
+      cb(canvasToTargetJpeg(canvas));
+    } catch (e) { try { URL.revokeObjectURL(objUrl); } catch (e2) {} cb(null); }
+  };
+  img.onerror = function () { try { URL.revokeObjectURL(objUrl); } catch (e) {} cb(null); };
+  img.src = objUrl;
+}
+function handlePhotoFiles(treeIdx, files, replaceIdx) {
+  var list = Array.prototype.slice.call(files || []);
+  if (!list.length) return;
+  var pending = list.length, anyOk = false;
+  list.forEach(function (file, k) {
+    compressPhotoFile(file, function (dataUrl) {
+      var t = current.trees[treeIdx];
+      if (dataUrl && t) {
+        anyOk = true;
+        if (!Array.isArray(t.photos)) t.photos = [];
+        if (replaceIdx != null && k === 0) t.photos[replaceIdx] = dataUrl;
+        else t.photos.push(dataUrl);
+      }
+      if (--pending === 0) {
+        if (anyOk) { bidDirty = true; priceDirty = true; renderTrees(); refreshPricing(); toast("Photo saved on this device"); }
+        else toast("That photo could not be read — try another one");
+      }
+    });
+  });
+}
+</script>
+
+<script>
+"use strict";
+/* ============================== UI ============================== */
+var bidDirty = false; /* true once the loaded bid is edited */
+var priceDirty = false; /* true only when PRICING inputs change; a saved bid reprints/sends from its snapshot until then */
+var currentFromSaved = false; /* true only when `current` was loaded untouched from the Saved Bids list */
+function $(id) { return document.getElementById(id); }
+function toast(msg) { var t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(function () { t.classList.remove("show"); }, 2200); }
+
+function showTab(name) {
+  document.querySelectorAll("nav.tabs button").forEach(function (b) { b.classList.toggle("active", b.dataset.tab === name); });
+  document.querySelectorAll("section.panel").forEach(function (p) { p.classList.toggle("active", p.id === "panel-" + name); });
+  if (name === "saved") renderSaved();
+  if (name === "quote") renderQuote();
+}
+
+/* ---- bid form <-> state ---- */
+function readBidForm() {
+  current.customer = $("custName").value.trim();
+  current.phone = $("custPhone").value.trim();
+  current.email = $("custEmail").value.trim();
+  current.payStatus = $("payStatus").value;
+  current.payMethod = $("payMethod").value;
+  current.depositAmt = Math.max(0, num($("depositAmt").value));
+  current.address = $("custAddr").value.trim();
+  current.date = $("bidDate").value || todayStr();
+  current.crewSize = Math.max(1, num($("crewSize").value, 1));
+  current.disposal = $("disposal").value;
+  current.travelMiles = Math.max(0, num($("travelMiles").value));
+  current.extras = Math.max(0, num($("extras").value));
+  current.notes = $("jobNotes").value;
+  current.internalNotes = $("internalNotes").value;
+  current.terms = $("quoteTerms").value;
+  var coH = Math.max(0, num($("coHours").value)), coC = Math.max(0, num($("coCosts").value)), coK = Math.max(0, num($("coCollected").value));
+  if (coH > 0 || coC > 0 || coK > 0) {
+    if (!current.closeout || typeof current.closeout !== "object") current.closeout = { closedAt: "" };
+    current.closeout.actualHours = coH; current.closeout.actualCosts = coC; current.closeout.collected = coK;
+  } else {
+    current.closeout = null;
+  }
+}
+function fillBidForm() {
+  $("custName").value = current.customer || "";
+  $("custPhone").value = current.phone || "";
+  $("custEmail").value = current.email || "";
+  $("payStatus").value = current.payStatus || "unpaid";
+  $("payMethod").value = current.payMethod || "";
+  $("depositAmt").value = current.depositAmt || 0;
+  $("custAddr").value = current.address || "";
+  $("bidDate").value = current.date || todayStr();
+  $("crewSize").value = current.crewSize;
+  $("disposal").value = current.disposal;
+  $("travelMiles").value = current.travelMiles;
+  $("extras").value = current.extras;
+  $("jobNotes").value = current.notes || "";
+  $("internalNotes").value = current.internalNotes || "";
+  $("quoteTerms").value = current.terms || DEFAULT_TERMS;
+  var co0 = (current.closeout && typeof current.closeout === "object") ? current.closeout : null;
+  $("coHours").value = co0 ? num(co0.actualHours) : 0;
+  $("coCosts").value = co0 ? num(co0.actualCosts) : 0;
+  $("coCollected").value = co0 ? num(co0.collected) : 0;
+  bidDirty = false; priceDirty = false;
+  var dl = $("speciesOptions");
+  if (dl && !dl.children.length) dl.innerHTML = COMMON_SPECIES.map(function (sp) { return '<option value="' + sp + '"></option>'; }).join("");
+  renderTrees(); renderItems(); refreshPresetPick(); refreshPricing(); refreshCloseout();
+}
+
+/* ---- trees ---- */
+function renderTrees() {
+  var wrap = $("treeList"); wrap.innerHTML = "";
+  current.trees.forEach(function (t, i) {
+    var card = document.createElement("div"); card.className = "tree-card";
+    var hzChecks = HAZARDS.map(function (hz) {
+      return '<label><input type="checkbox" data-tree="' + i + '" data-hazard="' + hz.key + '"' +
+        (t.hazards[hz.key] ? " checked" : "") + "> " + hz.label + " (×" + hz.mult.toFixed(2) + ")</label>";
+    }).join("");
+    var photos = Array.isArray(t.photos) ? t.photos : [];
+    var photoThumbs = photos.map(function (ph, j) {
+      return '<div class="tree-thumb-wrap"><img class="tree-thumb" data-thumb="' + i + '-' + j + '" src="' + ph + '" alt="Photo of tree ' + (i + 1) + '">' +
+        '<span class="tree-thumb-btns">' +
+        '<button type="button" class="btn danger small" data-photoremove="' + i + '" data-photoindex="' + j + '">Remove</button>' +
+        '<label class="btn ghost small photo-add" for="photo-replace-' + i + '-' + j + '">Replace</label>' +
+        '<input type="file" accept="image/*" id="photo-replace-' + i + '-' + j + '" data-photoreplaceinput="' + i + '" data-photoindex="' + j + '" style="display:none">' +
+        "</span></div>";
+    }).join("");
+    card.innerHTML =
+      '<div class="tree-head"><span class="tname">Tree ' + (i + 1) + '</span>' +
+      '<span class="tcost" id="tcost-' + i + '"></span>' +
+      (current.trees.length > 1 ? '<button type="button" class="btn danger small" data-remove="' + i + '">Remove</button>' : "") + '</div>' +
+      '<div class="grid">' +
+      '<div><label class="f">Species / type</label><input type="text" list="speciesOptions" data-tree="' + i + '" data-field="species" value="' + esc(t.species) + '" placeholder="Oak, Pine, Maple…"></div>' +
+      '<div><label class="f">Work type</label><select data-tree="' + i + '" data-field="work">' +
+        Object.keys(WORK_LABELS).map(function (w) { return '<option value="' + w + '"' + (t.work === w ? " selected" : "") + ">" + WORK_LABELS[w] + "</option>"; }).join("") +
+      "</select></div>" +
+      '<div><label class="f">Height (ft)</label><input inputmode="decimal" type="number" min="0" step="1" data-tree="' + i + '" data-field="height" value="' + t.height + '"></div>' +
+      '<div><label class="f">Trunk diameter (in)</label><input inputmode="decimal" type="number" min="0" step="1" data-tree="' + i + '" data-field="diameter" value="' + t.diameter + '"></div>' +
+      '<div><label class="f">Access difficulty</label><select data-tree="' + i + '" data-field="access">' +
+        Object.keys(ACCESS).map(function (a) { return '<option value="' + a + '"' + (t.access === a ? " selected" : "") + ">" + a.charAt(0).toUpperCase() + a.slice(1) + " (×" + ACCESS[a].toFixed(2) + ")</option>"; }).join("") +
+      "</select></div>" +
+      '<div><label class="f">Est. crew time (hrs)</label><input inputmode="decimal" type="number" min="0" step="0.25" data-tree="' + i + '" data-field="hours" value="' + t.hours + '"></div>' +
+      '<div><label class="f">Where on the property</label><input type="text" data-tree="' + i + '" data-field="location" value="' + esc(t.location || "") + '" placeholder="e.g. backyard, by the fence"></div>' +
+      '<div><label class="f">Landing / drop zone</label><select data-tree="' + i + '" data-field="landing">' +
+        LANDING_VALUES.map(function (lv) { return '<option value="' + lv + '"' + ((t.landing || "none") === lv ? " selected" : "") + ">" + LANDING_LABELS[lv] + "</option>"; }).join("") +
+      "</select></div>" +
+      "</div>" +
+      '<div class="checks">' + hzChecks + "</div>" +
+      '<div class="mult-note" id="tnote-' + i + '"></div>' +
+      '<details class="tree-more"><summary>More details (optional)</summary><div class="grid" style="margin-top:6px">' +
+      '<div><label class="f">Stump</label><select data-tree="' + i + '" data-field="stump">' +
+        STUMP_VALUES.map(function (sv) { return '<option value="' + sv + '"' + ((t.stump || "none") === sv ? " selected" : "") + ">" + STUMP_LABELS[sv] + "</option>"; }).join("") +
+      "</select></div>" +
+      '<div><label class="f">Wood</label><select data-tree="' + i + '" data-field="wood">' +
+        '<option value=""' + (!t.wood ? " selected" : "") + ">Use job disposal default</option>" +
+        '<option value="haul"' + (t.wood === "haul" ? " selected" : "") + ">Haul off</option>" +
+        '<option value="leave"' + (t.wood === "leave" ? " selected" : "") + ">Leave for customer</option>" +
+      "</select></div>" +
+      '<div><label class="f">Note for this tree</label><input type="text" data-tree="' + i + '" data-field="note" value="' + esc(t.note || "") + '" placeholder="One line — e.g. over the septic line"></div>' +
+      "</div></details>" +
+      '<div style="margin-top:10px"><label class="f">Photos of this tree</label>' +
+      (photos.length ? '<div class="tree-photos">' + photoThumbs + "</div>" : '<p class="hint" style="margin:2px 0 6px">No photo yet — add one so you can remember which tree is which. It prints on the customer quote.</p>') +
+      '<div class="btnrow" style="margin-top:6px"><label class="btn secondary small photo-add" for="photo-add-' + i + '">📷 Add a photo</label>' +
+      '<input type="file" accept="image/*" multiple id="photo-add-' + i + '" data-photoinput="' + i + '" style="display:none"></div></div>';
+    wrap.appendChild(card);
+  });
+}
+function updateTreeNotes(calc) {
+  calc.treeLines.forEach(function (tl) {
+    var c = $("tcost-" + tl.idx), n = $("tnote-" + tl.idx);
+    if (c) c.textContent = "This tree by itself: " + money(tl.cost);
+    if (n) n.textContent = tl.mult !== 1 ? "Difficulty multiplier ×" + tl.mult.toFixed(3) + " applied to this tree's labor & equipment." : "No difficulty multiplier on this tree.";
+  });
+  var dn = $("disposalNote");
+  if (dn) dn.textContent = current.disposal === "haul" ? "Costs " + money(disposalCost(current, settings)) + " on this job (base + per removal tree)."
+    : current.disposal === "chip" ? "Flat " + money(settings.chipFee) + " per job." : "No disposal cost.";
+}
+
+/* ---- preset items on the bid ---- */
+function refreshPresetPick() {
+  var sel = $("presetPick"); if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = (settings.presets || []).filter(function (pr) { return pr.name; }).map(function (pr) {
+    return '<option value="' + esc(pr.id) + '">' + esc(pr.name) + " \u2014 " + money(pr.price) + "</option>";
+  }).join("") || '<option value="">(rate card is empty \u2014 add items in Business Settings)</option>';
+  if (cur) sel.value = cur;
+}
+function renderItems() {
+  var wrap = $("itemList"); if (!wrap) return;
+  if (!current.items || !current.items.length) { wrap.innerHTML = '<p class="hint">No preset items on this bid yet.</p>'; return; }
+  wrap.innerHTML = current.items.map(function (it, i) {
+    return '<div class="grid" style="margin-bottom:8px;align-items:end">' +
+      '<div><label class="f">Item</label><input type="text" data-item="' + i + '" data-ifield="name" value="' + esc(it.name) + '"></div>' +
+      '<div><label class="f">Qty</label><input inputmode="decimal" type="number" min="0" step="1" data-item="' + i + '" data-ifield="qty" value="' + it.qty + '"></div>' +
+      '<div><label class="f">Price ($) \u2014 override for this bid</label><input inputmode="decimal" type="number" min="0" step="1" data-item="' + i + '" data-ifield="price" value="' + it.price + '"></div>' +
+      '<div><button type="button" class="btn danger small" data-itemremove="' + i + '">Remove</button></div></div>';
+  }).join("");
+}
+/* ---- rate card (settings) ---- */
+function renderPresets() {
+  var wrap = $("presetList"); if (!wrap) return;
+  if (!settings.presets || !settings.presets.length) { wrap.innerHTML = '<p class="hint">No presets yet \u2014 add a custom item below.</p>'; return; }
+  wrap.innerHTML = settings.presets.map(function (pr, i) {
+    return '<div class="grid" style="margin-bottom:8px;align-items:end">' +
+      '<div><label class="f">Item name</label><input type="text" data-preset="' + i + '" data-pfield="name" value="' + esc(pr.name) + '"></div>' +
+      '<div><label class="f">Price ($)</label><input inputmode="decimal" type="number" min="0" step="1" data-preset="' + i + '" data-pfield="price" value="' + pr.price + '"></div>' +
+      '<div><button type="button" class="btn danger small" data-presetdel="' + i + '">Delete</button></div></div>';
+  }).join("");
+}
+
+/* ---- breakdown ---- */
+function refreshPricing() {
+  readBidForm();
+  var calc = calcBid(current, settings);
+  var rows = "";
+  calc.treeLines.forEach(function (tl) {
+    var t = tl.tree;
+    rows += "<tr><td>" + esc(t.species || "Tree " + (tl.idx + 1)) + " — " + WORK_LABELS[t.work] +
+      ' <span class="hint">(' + tl.time + " hrs × " + Math.max(1, num(current.crewSize, 1)) + " crew" +
+      (tl.mult !== 1 ? ", ×" + tl.mult.toFixed(3) + " difficulty" : "") + ")</span></td>" +
+      '<td class="r">' + money(tl.cost) + "</td></tr>";
+  });
+  rows += '<tr><td>Labor subtotal</td><td class="r">' + money(calc.laborTotal) + "</td></tr>";
+  rows += '<tr><td>Equipment subtotal</td><td class="r">' + money(calc.equipTotal) + "</td></tr>";
+  rows += "<tr><td>Disposal — " + DISPOSAL_LABELS[current.disposal] + '</td><td class="r">' + money(calc.disposal) + "</td></tr>";
+  rows += "<tr><td>Travel — " + num(current.travelMiles) + " mi × " + money(settings.travelRate) + '</td><td class="r">' + money(calc.travel) + "</td></tr>";
+  if (calc.extras > 0) rows += '<tr><td>Extra expenses</td><td class="r">' + money(calc.extras) + "</td></tr>";
+  if (calc.itemsTotal > 0) rows += '<tr><td>Preset services &amp; items</td><td class="r">' + money(calc.itemsTotal) + "</td></tr>";
+  rows += '<tr class="sub"><td>Direct cost</td><td class="r">' + money(calc.direct) + "</td></tr>";
+  rows += "<tr><td>Overhead (" + num(settings.overheadPct) + '%)</td><td class="r">' + money(calc.overheadAmt) + "</td></tr>";
+  rows += '<tr class="sub"><td>Break-even (direct + overhead)</td><td class="r">' + money(calc.breakEven) + "</td></tr>";
+  rows += '<tr><td>Profit margin (' + num(settings.marginPct) + '% of price)</td><td class="r">' + money(calc.recommended - calc.breakEven) + "</td></tr>";
+  rows += '<tr class="grand"><td>Recommended bid</td><td class="r">' + money(calc.recommended) + "</td></tr>";
+  if (settings.taxEnabled) rows += "<tr><td>Sales tax (" + num(settings.taxRate) + '%)</td><td class="r">' + money(calc.taxAmt) + "</td></tr>" +
+    '<tr class="grand"><td>Total with tax</td><td class="r">' + money(calc.totalWithTax) + "</td></tr>";
+  $("breakdown").innerHTML = '<table class="bd">' + rows + "</table>";
+  var tq = $("twoQuotes");
+  if (tq) {
+    var perRows = calc.treeLines.map(function (tl) {
+      var tt = tl.tree;
+      return "<tr><td>" + esc(tt.species || "Tree " + (tl.idx + 1)) + " — " + WORK_LABELS[tt.work] +
+        ' <span class="twoquote-note">(this tree\'s labor + equipment only — no disposal, travel, extras or overhead)</span></td>' +
+        '<td class="r">' + money(tl.cost) + "</td></tr>";
+    }).join("");
+    tq.innerHTML = '<h3 style="margin:16px 0 6px">This tree by itself</h3>' +
+      '<table class="bd">' + perRows + "</table>" +
+      '<h3 style="margin:16px 0 4px">Whole job, everything in</h3>' +
+      '<p class="twoquote-note" style="margin:0">All trees + disposal + travel + extras + overhead + margin — the three figures below. The per-tree figures above are never blended into this total by hand; the whole-job math already includes every tree.</p>';
+  }
+  $("numBreakEven").textContent = money(calc.breakEven);
+  $("numRecommended").textContent = money(settings.taxEnabled ? calc.totalWithTax : calc.recommended);
+  $("numPremium").textContent = money(calc.premium * (settings.taxEnabled ? calc.totalWithTax / (calc.recommended || 1) : 1));
+  updateTreeNotes(calc);
+  refreshCloseout();
+  return calc;
+}
+/* ---- closeout preview (builder): live bid-vs-actual from the form ---- */
+function refreshCloseout() {
+  var box = $("closeoutResults"); if (!box) return;
+  readBidForm();
+  var co = current.closeout;
+  if (!co) { box.innerHTML = '<p class="hint">No closeout yet — after the job, enter the actuals above and this bid will show its real margin here and in the Saved Bids summary.</p>'; return; }
+  var cc = calcCloseout(current, settings, co);
+  var hrsVar = num(co.actualHours) - cc.bidHours;
+  var costVar = cc.actualCost - cc.bidBreakEven;
+  var collVar = num(co.collected) - cc.bidPrice;
+  function signed(v) { return (v >= 0 ? "+" : "-") + money(Math.abs(v)); }
+  function signedH(v) { return (v >= 0 ? "+" : "-") + (Math.round(Math.abs(v) * 100) / 100) + " hrs"; }
+  var rows = "";
+  rows += '<tr><td>Actual labor (' + num(co.actualHours) + " hrs × " + cc.crewSize + " crew × " + money(cc.laborRate) + ')</td><td class="r">' + money(cc.actualLabor) + "</td></tr>";
+  rows += '<tr><td>Actual other costs</td><td class="r">' + money(num(co.actualCosts)) + "</td></tr>";
+  rows += '<tr class="sub"><td>Actual cost (incl. ' + cc.overheadPct + '% overhead)</td><td class="r">' + money(cc.actualCost) + "</td></tr>";
+  rows += '<tr><td>Amount collected</td><td class="r">' + money(num(co.collected)) + "</td></tr>";
+  rows += '<tr class="grand"><td>Actual profit</td><td class="r">' + money(cc.actualProfit) + "</td></tr>";
+  rows += '<tr class="grand"><td>Actual margin</td><td class="r">' + (num(co.collected) > 0 ? cc.actualMarginPct.toFixed(1) + "%" : "—") + "</td></tr>";
+  box.innerHTML = '<table class="bd">' + rows + "</table>" +
+    '<p class="hint" style="margin-top:6px">Vs. this bid: hours ' + signedH(hrsVar) + " (bid " + cc.bidHours + ' hrs) · cost ' + signed(costVar) + " (bid break-even " + money(cc.bidBreakEven) + ") · collected " + signed(collVar) + " (bid price " + money(cc.bidPrice) + ").</p>";
+}
+
+/* ---- saved bids ---- */
+function saveCurrentBid() {
+  readBidForm();
+  if (!current.customer) { toast("Add a customer name first"); $("custName").focus(); return; }
+  /* Freeze a fresh snapshot when pricing changed or this bid was never
+     loaded from the saved list; a payment/notes-only re-save of a loaded
+     bid keeps its original frozen prices. */
+  if (!current.snapshot || priceDirty || !currentFromSaved) {
+    var calc = calcBid(current, settings);
+    current.total = Math.round(calc.recommended * 100) / 100;
+    current.snapshot = buildSnapshot(current, settings);
+  }
+  /* Freeze the closeout calc on this same record (rates + bid baseline as
+     of this save) so saved margins never drift when rates change later. */
+  if (current.closeout && typeof current.closeout === "object" &&
+      (num(current.closeout.actualHours) > 0 || num(current.closeout.actualCosts) > 0 || num(current.closeout.collected) > 0)) {
+    current.closeout.calc = calcCloseout(current, settings, current.closeout);
+    if (!current.closeout.closedAt) current.closeout.closedAt = new Date().toISOString();
+  }
+  current.savedAt = new Date().toISOString();
+  bidDirty = false; priceDirty = false; currentFromSaved = true;
+  if (!current.id) current.id = uid();
+  var ix = bids.findIndex(function (b) { return b.id === current.id; });
+  var copy = JSON.parse(JSON.stringify(current));
+  if (ix >= 0) bids[ix] = copy; else bids.unshift(copy);
+  persistBids();
+  $("saveHint").textContent = "Saved — find it any time on the Saved Bids tab.";
+  toast("Bid saved");
+}
+function renderSaved() {
+  var filter = $("savedFilter").value;
+  var list = bids.filter(function (b) { return filter === "all" || (b.status || "open") === filter; });
+  var won = bids.filter(function (b) { return b.status === "won"; });
+  var openVal = bids.filter(function (b) { return (b.status || "open") === "open"; }).reduce(function (a, b) { return a + num(b.total); }, 0);
+  var wonVal = won.reduce(function (a, b) { return a + num(b.total); }, 0);
+  var closed = bids.filter(function (b) { return b.status === "won" || b.status === "lost"; }).length;
+  var coAgg = { n: 0, collected: 0, profit: 0, bidPrice: 0 };
+  bids.forEach(function (b) {
+    var cc = closeoutCalcFor(b, settings);
+    if (cc) { coAgg.n++; coAgg.collected += num(b.closeout.collected); coAgg.profit += cc.actualProfit; coAgg.bidPrice += cc.bidPrice; }
+  });
+  $("savedSummary").innerHTML = bids.length + " saved · " + money(openVal) + " open · " + money(wonVal) + " won" +
+    (closed ? " · win rate " + Math.round(100 * won.length / closed) + "%" : "") +
+    (coAgg.n ? " · Closed out: " + coAgg.n + " job(s)" + (coAgg.collected > 0 ? " · real margin " + (coAgg.profit / coAgg.collected * 100).toFixed(1) + "%" : "") + " · collected " + money(coAgg.collected) + " on " + money(coAgg.bidPrice) + " bid" : "");
+  if (!list.length) { $("savedList").innerHTML = '<p class="hint">No bids here yet. Build one in the Bid Builder and hit “Save This Bid.”</p>'; return; }
+  $("savedList").innerHTML = list.map(function (b) {
+    var st = b.status || "open";
+    return '<div class="saved-item"><span class="who">' + esc(b.customer || "Untitled bid") + "</span>" +
+      '<span class="badge ' + st + '">' + st + "</span>" +
+      '<span class="meta">' + esc(b.date || "") + (b.address ? " · " + esc(b.address) : "") + " · " + (b.trees ? b.trees.length : 0) + " tree(s)</span>" +
+      (b.payStatus === "paid" ? '<span class="badge paidf">Paid in full' + (b.payMethod ? " \u00B7 " + esc(b.payMethod) : "") + "</span>" :
+       b.payStatus === "deposit" ? '<span class="badge deposit">Deposit ' + money(num(b.depositAmt)) + " paid" + (b.payMethod ? " \u00B7 " + esc(b.payMethod) : "") + "</span>" : "") +
+      '<span class="amt">' + money(num(b.total)) + "</span>" +
+      (closeoutSummaryText(b, settings) ? '<span class="co-line">' + esc(closeoutSummaryText(b, settings)) + "</span>" : "") +
+      '<span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button type="button" class="btn secondary small" data-load="' + b.id + '">Open</button>' +
+      '<button type="button" class="btn ghost small" data-dup="' + b.id + '">Duplicate</button>' +
+      '<button type="button" class="btn ghost small" data-send="' + b.id + '">Send</button>' +
+      '<button type="button" class="btn ghost small" data-status="won" data-id="' + b.id + '">Won</button>' +
+      '<button type="button" class="btn ghost small" data-status="lost" data-id="' + b.id + '">Lost</button>' +
+      '<button type="button" class="btn ghost small" data-status="open" data-id="' + b.id + '">Reopen</button>' +
+      '<button type="button" class="btn danger small" data-del="' + b.id + '">Delete</button></span></div>';
+  }).join("");
+}
+
+/* ---- quote ---- */
+function quoteRowHTML(l) {
+  var img = l.photo ? '<img class="quote-photo" src="' + l.photo + '" alt="Photo of this tree">' : "";
+  var text = "<div><strong>" + l.desc + "</strong>" + (l.detail ? '<br><span style="color:#5c6a62;font-size:12.5px">' + esc(l.detail) + "</span>" : "") + "</div>";
+  var cell = img ? '<div class="quote-line-flex">' + img + text + "</div>" : text;
+  return "<tr><td>" + cell + '</td><td class="r">' + money(num(l.amount)) + "</td></tr>";
+}
+function quoteHTML(bid, s) {
+  if (bid.snapshot && !priceDirty) return quoteHTMLFromSnapshot(bid);
+  var calc = calcBid(bid, s);
+  var lines = quoteLines(bid, s, calc);
+  var rows = lines.map(quoteRowHTML).join("");
+  var taxRow = s.taxEnabled ? "<tr><td>Sales tax (" + num(s.taxRate) + '%)</td><td class="r">' + money(calc.taxAmt) + "</td></tr>" : "";
+  var niceDate = bid.date ? new Date(bid.date + "T12:00:00").toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "";
+  var warn = companyIsPlaceholder(s.company) ? '<div class="demo-warn">\u26A0 DEMO \u2014 set your business name in Business Settings before sending this quote.</div>' : "";
+  return '<div class="quote-sheet">' + warn +
+    '<div class="qhead"><div><div class="qco">' + esc(companyIsPlaceholder(s.company) ? "Your Company" : s.company) + "</div>" +
+    '<div style="font-size:13px;color:#5c6a62">' + esc(s.phone || "") + (s.phone && s.email ? " · " : "") + esc(s.email || "") + "</div></div>" +
+    '<div class="qmeta"><div style="font-size:16px;font-weight:800;color:#1c2420">TREE WORK QUOTE</div><div>' + esc(niceDate) + "</div></div></div>" +
+    '<div style="margin-top:14px;font-size:14px"><strong>Prepared for:</strong> ' + esc(bid.customer || "—") +
+    (bid.address ? "<br>" + esc(bid.address) : "") + (bid.phone ? "<br>" + esc(bid.phone) : "") + "</div>" +
+    "<table><thead><tr><th>Work</th><th class=\"r\">Amount</th></tr></thead><tbody>" + rows + taxRow +
+    '<tr><td style="border-bottom:none;padding-top:12px"><strong>Total</strong></td><td class="r qtotal" style="border-bottom:none;padding-top:12px">' + money(calc.totalWithTax) + "</td></tr></tbody></table>" +
+    (bid.notes ? '<div style="margin-top:12px;font-size:13px"><strong>Notes:</strong> ' + esc(bid.notes) + "</div>" : "") +
+    '<div class="qterms">' + esc(bid.terms || DEFAULT_TERMS) + "</div>" +
+    '<div style="margin-top:16px;font-size:12.5px;color:#5c6a62">Thank you for the opportunity to quote your tree work.</div></div>';
+}
+function quoteHTMLFromSnapshot(bid) {
+  var snap = bid.snapshot;
+  var ss = { company: snap.company || "", phone: snap.phone || "", email: snap.email || "" };
+  var rows = snap.lines.map(quoteRowHTML).join("");
+  var taxRow = snap.taxEnabled ? "<tr><td>Sales tax (" + num(snap.taxRate) + '%)</td><td class="r">' + money(num(snap.taxAmt)) + "</td></tr>" : "";
+  var niceDate = bid.date ? new Date(bid.date + "T12:00:00").toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "";
+  var warn = companyIsPlaceholder(ss.company) ? '<div class="demo-warn">\u26A0 DEMO \u2014 set your business name in Business Settings before sending this quote.</div>' : "";
+  return '<div class="quote-sheet">' + warn +
+    '<div class="qhead"><div><div class="qco">' + esc(companyIsPlaceholder(ss.company) ? "Your Company" : ss.company) + "</div>" +
+    '<div style="font-size:13px;color:#5c6a62">' + esc(ss.phone || "") + (ss.phone && ss.email ? " \u00B7 " : "") + esc(ss.email || "") + "</div></div>" +
+    '<div class="qmeta"><div style="font-size:16px;font-weight:800;color:#1c2420">TREE WORK QUOTE</div><div>' + esc(niceDate) + "</div></div></div>" +
+    '<div style="margin-top:14px;font-size:14px"><strong>Prepared for:</strong> ' + esc(bid.customer || "\u2014") +
+    (bid.address ? "<br>" + esc(bid.address) : "") + (bid.phone ? "<br>" + esc(bid.phone) : "") + "</div>" +
+    "<table><thead><tr><th>Work</th><th class=\"r\">Amount</th></tr></thead><tbody>" + rows + taxRow +
+    '<tr><td style="border-bottom:none;padding-top:12px"><strong>Total</strong></td><td class="r qtotal" style="border-bottom:none;padding-top:12px">' + money(num(snap.totalWithTax)) + "</td></tr></tbody></table>" +
+    (bid.notes ? '<div style="margin-top:12px;font-size:13px"><strong>Notes:</strong> ' + esc(bid.notes) + "</div>" : "") +
+    '<div class="qterms">' + esc(bid.terms || DEFAULT_TERMS) + "</div>" +
+    '<div style="margin-top:16px;font-size:12.5px;color:#5c6a62">Thank you for the opportunity to quote your tree work.</div></div>';
+}
+function renderQuote() {
+  readBidForm();
+  var html = quoteHTML(current, settings);
+  $("quotePreview").innerHTML = html;
+  $("quotePrint").innerHTML = html;
+  renderSendPanel();
+}
+
+/* ---- settings form ---- */
+function fillSettingsForm() {
+  $("setCompany").value = settings.company; $("setPhone").value = settings.phone; $("setEmail").value = settings.email;
+  $("setLabor").value = settings.laborRate; $("setEquip").value = settings.equipRate;
+  $("setOverhead").value = settings.overheadPct; $("setMargin").value = settings.marginPct;
+  $("setTravel").value = settings.travelRate; $("setTaxOn").checked = !!settings.taxEnabled; $("setTaxRate").value = settings.taxRate;
+  $("setHaulBase").value = settings.haulBase; $("setHaulRemoval").value = settings.haulPerRemoval; $("setChipFee").value = settings.chipFee;
+  $("headerCompany").innerHTML = esc(companyIsPlaceholder(settings.company) ? "Your Company" : settings.company) + (settings.phone ? "<br>" + esc(settings.phone) : "");
+  renderPresets();
+}
+function readSettingsForm() {
+  settings.company = $("setCompany").value.trim(); settings.phone = $("setPhone").value.trim(); settings.email = $("setEmail").value.trim();
+  settings.laborRate = Math.max(0, num($("setLabor").value)); settings.equipRate = Math.max(0, num($("setEquip").value));
+  settings.overheadPct = Math.min(90, Math.max(0, num($("setOverhead").value)));
+  settings.marginPct = Math.min(90, Math.max(0, num($("setMargin").value)));
+  settings.travelRate = Math.max(0, num($("setTravel").value));
+  settings.taxEnabled = $("setTaxOn").checked; settings.taxRate = Math.max(0, num($("setTaxRate").value));
+  settings.haulBase = Math.max(0, num($("setHaulBase").value)); settings.haulPerRemoval = Math.max(0, num($("setHaulRemoval").value));
+  settings.chipFee = Math.max(0, num($("setChipFee").value));
+}
+
+/* ============================== SEND & WAVE ============================== */
+var lastQuoteText = "", lastWaveText = "";
+function plainText(str) {
+  return String(str == null ? "" : str).replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+}
+/* The one source of truth for what a customer sees: snapshot when the bid
+   is a clean saved bid, live math while it's being edited. */
+function getQuoteData(bid) {
+  if (bid.snapshot && !priceDirty) {
+    var sn = bid.snapshot;
+    return { company: sn.company || "", phone: sn.phone || "", email: sn.email || "",
+             lines: sn.lines, taxEnabled: !!sn.taxEnabled, taxRate: num(sn.taxRate),
+             taxAmt: num(sn.taxAmt), total: num(sn.totalWithTax) };
+  }
+  var calc = calcBid(bid, settings);
+  return { company: settings.company || "", phone: settings.phone || "", email: settings.email || "",
+           lines: quoteLines(bid, settings, calc), taxEnabled: !!settings.taxEnabled,
+           taxRate: num(settings.taxRate), taxAmt: calc.taxAmt, total: calc.totalWithTax };
+}
+function buildQuoteText(bid) {
+  var q = getQuoteData(bid);
+  var co = companyIsPlaceholder(q.company) ? "Your Company" : q.company;
+  var out = [];
+  out.push("Tree work quote from " + co);
+  out.push("For: " + (bid.customer || "\u2014") + (bid.address ? " \u2014 " + bid.address : ""));
+  if (bid.date) out.push("Date: " + bid.date);
+  out.push("");
+  q.lines.forEach(function (l) {
+    out.push(plainText(l.desc) + (l.detail ? " (" + plainText(l.detail) + ")" : "") + " \u2014 " + money(num(l.amount)));
+  });
+  if (q.taxEnabled) out.push("Sales tax (" + q.taxRate + "%) \u2014 " + money(q.taxAmt));
+  out.push("Total: " + money(q.total));
+  out.push("");
+  if (bid.notes) out.push("Notes: " + bid.notes);
+  out.push("Quote valid for 30 days. To book, just reply to this message" + (q.phone ? " or call " + q.phone : "") + ".");
+  return out.join("\n");
+}
+function buildWaveData(bid) {
+  var q = getQuoteData(bid);
+  var rows = q.lines.map(function (l) { return { name: plainText(l.desc), qty: 1, price: Math.round(num(l.amount) * 100) / 100 }; });
+  if (q.taxEnabled && q.taxAmt > 0) rows.push({ name: "Sales tax (" + q.taxRate + "%)", qty: 1, price: Math.round(q.taxAmt * 100) / 100 });
+  var lines = ["Item\tQty\tPrice\tAmount"];
+  rows.forEach(function (r) { lines.push(r.name + "\t" + r.qty + "\t" + r.price.toFixed(2) + "\t" + (r.qty * r.price).toFixed(2)); });
+  lines.push("Total\t\t\t" + q.total.toFixed(2));
+  return { rows: rows, total: q.total, text: lines.join("\n") };
+}
+function copyText(str, okMsg) {
+  function fallback() {
+    var ta = document.createElement("textarea");
+    ta.value = str; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    var doneOk = false;
+    try { doneOk = !!document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+    toast(doneOk ? okMsg : "Copy failed \u2014 long-press / Ctrl+C the quote text instead");
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(str).then(function () { toast(okMsg); }, fallback);
+  } else fallback();
+}
+function renderSendPanel() {
+  var text = buildQuoteText(current);
+  lastQuoteText = text;
+  var q = getQuoteData(current);
+  var co = companyIsPlaceholder(q.company) ? "Your Company" : q.company;
+  $("sendEmailBtn").href = "mailto:" + encodeURIComponent(current.email || "") + "?subject=" + encodeURIComponent("Tree work quote from " + co) + "&body=" + encodeURIComponent(text);
+  var digits = String(current.phone || "").replace(/\D/g, "");
+  $("sendSmsBtn").href = "sms:" + digits + "?&body=" + encodeURIComponent(text);
+  $("sendWaBtn").href = "https://wa.me/" + digits + "?text=" + encodeURIComponent(text);
+  var hints = [];
+  if (!current.email) hints.push("Add the customer's email in the Bid Builder and Email quote is addressed in one tap.");
+  if (!current.phone) hints.push("Add the customer's phone in the Bid Builder and Text / WhatsApp are addressed in one tap.");
+  if (companyIsPlaceholder(q.company)) hints.push("Your business name is still the placeholder \u2014 set it in Business Settings before sending.");
+  $("sendHint").textContent = hints.join(" ");
+  var w = buildWaveData(current);
+  lastWaveText = w.text;
+  $("waveBox").innerHTML = '<table class="wave"><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Amount</th></tr></thead><tbody>' +
+    w.rows.map(function (r) { return "<tr><td>" + esc(r.name) + '</td><td class="r">' + r.qty + '</td><td class="r">' + money(r.price) + '</td><td class="r">' + money(r.qty * r.price) + "</td></tr>"; }).join("") +
+    '<tr><td colspan="3" style="font-weight:800">Total</td><td class="r" style="font-weight:800">' + money(w.total) + "</td></tr></tbody></table>";
+}
+
+/* ============================== BACKUP ============================== */
+function backupDateStr() { return todayStr(); }
+function exportBackup() {
+  var payload = { app: "treebid-pro", version: 1, exportedAt: new Date().toISOString(), settings: settings, bids: bids };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "branchmath-backup-" + backupDateStr() + ".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  $("backupMsg").textContent = "Backup exported \u2014 keep that JSON file somewhere safe; Import backup can restore from it.";
+}
+function importBackup(file) {
+  var reader = new FileReader();
+  reader.onload = function () {
+    var parsed;
+    try { parsed = JSON.parse(reader.result); } catch (e) { parsed = null; }
+    if (!parsed || parsed.app !== "treebid-pro" || !parsed.settings || typeof parsed.settings !== "object" || !Array.isArray(parsed.bids)) {
+      $("backupMsg").textContent = "That file is not a valid BranchMath backup \u2014 nothing was changed.";
+      return;
+    }
+    if (!confirm("Replace ALL current bids and settings with this backup? This cannot be undone.")) {
+      $("backupMsg").textContent = "Import cancelled \u2014 nothing was changed.";
+      return;
+    }
+    try {
+      localStorage.setItem(LS_SETTINGS, JSON.stringify(parsed.settings));
+      localStorage.setItem(LS_BIDS, JSON.stringify(parsed.bids));
+    } catch (e) {}
+    settings = loadSettings(); bids = loadBids();
+    current = blankBid(); var t = blankTree(); t.hours = suggestedHours(t); current.trees = [t];
+    fillSettingsForm(); fillBidForm(); renderSaved();
+    $("backupMsg").textContent = "Backup restored \u2713 (" + bids.length + " bid(s)).";
+    toast("Backup restored");
+  };
+  reader.onerror = function () { $("backupMsg").textContent = "Could not read that file \u2014 nothing was changed."; };
+  reader.readAsText(file);
+}
+
+/* ============================== EVENTS / INIT ============================== */
+function init() {
+  if (!bids.length && !localStorage.getItem(LS_BIDS)) {
+    var ex = exampleBid();
+    ex.total = Math.round(calcBid(ex, settings).recommended * 100) / 100;
+    ex.snapshot = buildSnapshot(ex, settings);
+    ex.savedAt = new Date().toISOString();
+    bids = [ex]; persistBids();
+    current = JSON.parse(JSON.stringify(ex));
+  } else {
+    current = blankBid();
+    var t = blankTree(); t.hours = suggestedHours(t); current.trees = [t];
+  }
+  fillSettingsForm(); fillBidForm();
+
+  $("tabNav").addEventListener("click", function (e) { if (e.target.dataset.tab) showTab(e.target.dataset.tab); });
+
+  var PRICE_IDS = { crewSize: 1, disposal: 1, travelMiles: 1, extras: 1 };
+  ["custName", "custPhone", "custEmail", "custAddr", "bidDate", "crewSize", "disposal", "travelMiles", "extras", "jobNotes", "internalNotes"].forEach(function (id) {
+    $(id).addEventListener("input", function () { bidDirty = true; if (PRICE_IDS[id]) priceDirty = true; refreshPricing(); });
+    $(id).addEventListener("change", function () { bidDirty = true; if (PRICE_IDS[id]) priceDirty = true; refreshPricing(); });
+  });
+  /* payment tracking is bookkeeping, not pricing: it never invalidates a saved snapshot */
+  ["payStatus", "payMethod", "depositAmt"].forEach(function (id) {
+    $(id).addEventListener("input", readBidForm);
+    $(id).addEventListener("change", readBidForm);
+  });
+  /* closeout is bookkeeping on the same record, like payment tracking: it
+     never invalidates the saved price snapshot */
+  ["coHours", "coCosts", "coCollected"].forEach(function (id) {
+    $(id).addEventListener("input", function () { bidDirty = true; refreshCloseout(); });
+    $(id).addEventListener("change", function () { bidDirty = true; refreshCloseout(); });
+  });
+  $("quoteTerms").addEventListener("input", function () { bidDirty = true; readBidForm(); });
+
+  $("treeList").addEventListener("input", function (e) {
+    bidDirty = true; priceDirty = true;
+    var el = e.target, i = el.dataset.tree;
+    if (i === undefined) return;
+    var t = current.trees[+i]; if (!t) return;
+    if (el.dataset.hazard) { t.hazards[el.dataset.hazard] = el.checked; refreshPricing(); return; }
+    var f = el.dataset.field; if (!f) return;
+    if (f === "species") t.species = el.value;
+    else if (f === "location") t.location = el.value;
+    else if (f === "note") t.note = el.value;
+    else if (f === "height" || f === "diameter") { t[f] = num(el.value); }
+    else if (f === "hours") { t.hours = num(el.value); }
+    refreshPricing();
+  });
+  $("treeList").addEventListener("change", function (e) {
+    var pel = e.target;
+    if (pel.dataset && pel.dataset.photoinput !== undefined) { handlePhotoFiles(+pel.dataset.photoinput, pel.files, null); pel.value = ""; return; }
+    if (pel.dataset && pel.dataset.photoreplaceinput !== undefined) { handlePhotoFiles(+pel.dataset.photoreplaceinput, pel.files, +pel.dataset.photoindex); pel.value = ""; return; }
+    bidDirty = true; priceDirty = true;
+    var el = e.target, i = el.dataset.tree;
+    if (el.dataset.remove !== undefined) return;
+    if (i === undefined) return;
+    var t = current.trees[+i]; if (!t) return;
+    var f = el.dataset.field;
+    if (f === "work" || f === "access") {
+      t[f] = el.value;
+      if (f === "work") { t.hours = suggestedHours(t); renderTrees(); }
+      refreshPricing();
+    }
+    if (f === "stump" || f === "wood" || f === "landing") { t[f] = el.value; refreshPricing(); }
+    if (f === "height" || f === "diameter") { /* keep user's hours; don't override */ refreshPricing(); }
+  });
+  $("treeList").addEventListener("click", function (e) {
+    if (e.target.dataset && e.target.dataset.photoremove !== undefined) {
+      var pt = current.trees[+e.target.dataset.photoremove];
+      if (pt && Array.isArray(pt.photos)) {
+        pt.photos.splice(+e.target.dataset.photoindex, 1);
+        bidDirty = true; priceDirty = true; renderTrees(); refreshPricing(); toast("Photo removed");
+      }
+      return;
+    }
+    var i = e.target.dataset.remove;
+    if (i !== undefined) {
+      var t = current.trees[+i];
+      var label = (t && t.species) ? t.species : "Tree " + (+i + 1);
+      if (!confirm("Remove " + label + " from this bid?")) return;
+      bidDirty = true; priceDirty = true;
+      current.trees.splice(+i, 1); renderTrees(); refreshPricing();
+    }
+  });
+  $("addTreeBtn").addEventListener("click", function () {
+    bidDirty = true; priceDirty = true;
+    var t = blankTree(); t.hours = suggestedHours(t);
+    current.trees.push(t); renderTrees(); refreshPricing();
+  });
+
+  $("itemList").addEventListener("input", function (e) {
+    var el = e.target, i = el.dataset.item; if (i === undefined) return;
+    var it = current.items[+i]; if (!it) return;
+    bidDirty = true; priceDirty = true;
+    var f = el.dataset.ifield;
+    if (f === "name") it.name = el.value;
+    else if (f === "qty") it.qty = Math.max(0, num(el.value));
+    else if (f === "price") it.price = Math.max(0, num(el.value));
+    refreshPricing();
+  });
+  $("itemList").addEventListener("click", function (e) {
+    var i = e.target.dataset.itemremove;
+    if (i !== undefined) { bidDirty = true; priceDirty = true; current.items.splice(+i, 1); renderItems(); refreshPricing(); }
+  });
+  $("addItemBtn").addEventListener("click", function () {
+    var id = $("presetPick").value;
+    var pr = (settings.presets || []).find(function (x) { return x.id === id; });
+    if (!pr) { toast("Add a preset in Business Settings first"); return; }
+    bidDirty = true; priceDirty = true;
+    current.items.push({ name: pr.name, qty: 1, price: pr.price });
+    renderItems(); refreshPricing(); toast("Added: " + pr.name);
+  });
+
+  $("presetList").addEventListener("input", function (e) {
+    var el = e.target, i = el.dataset.preset; if (i === undefined) return;
+    var pr = settings.presets[+i]; if (!pr) return;
+    if (el.dataset.pfield === "name") pr.name = el.value;
+    else if (el.dataset.pfield === "price") pr.price = Math.max(0, num(el.value));
+    saveSettings(); refreshPresetPick();
+  });
+  $("presetList").addEventListener("click", function (e) {
+    var i = e.target.dataset.presetdel;
+    if (i !== undefined) {
+      var pr = settings.presets[+i];
+      if (!confirm("Delete the preset \u201C" + (pr ? pr.name : "item") + "\u201D from your rate card? Bids already saved keep their prices.")) return;
+      settings.presets.splice(+i, 1); saveSettings(); renderPresets(); refreshPresetPick(); toast("Preset deleted");
+    }
+  });
+  $("addPresetBtn").addEventListener("click", function () {
+    var name = $("newPresetName").value.trim();
+    var price = Math.max(0, num($("newPresetPrice").value));
+    if (!name) { toast("Give the custom item a name first"); $("newPresetName").focus(); return; }
+    settings.presets.push({ id: uid(), name: name, price: price });
+    saveSettings(); renderPresets(); refreshPresetPick();
+    $("newPresetName").value = ""; $("newPresetPrice").value = "";
+    toast("Preset added: " + name);
+  });
+
+  $("copyQuoteBtn").addEventListener("click", function () { copyText(lastQuoteText, "Quote text copied"); });
+  $("copyWaveBtn").addEventListener("click", function () { copyText(lastWaveText, "Invoice lines copied \u2014 paste them into your Wave invoice"); });
+
+  $("saveBidBtn").addEventListener("click", saveCurrentBid);
+  $("gotoQuoteBtn").addEventListener("click", function () { showTab("quote"); });
+  $("newBidBtn").addEventListener("click", function () {
+    readBidForm();
+    var hasContent = !!current.id || !!(current.customer || current.phone || current.address || current.notes || current.internalNotes) ||
+      current.trees.length > 1 || current.trees.some(function (t) { return !!t.species; }) || num(current.travelMiles) > 0 || num(current.extras) > 0;
+    if (hasContent && !confirm("Start a new bid? The bid you're working on will be discarded \u2014 save it first if you want to keep it.")) return;
+    current = blankBid(); var t = blankTree(); t.hours = suggestedHours(t); current.trees = [t];
+    $("saveHint").textContent = ""; fillBidForm(); currentFromSaved = false; toast("New bid started");
+  });
+
+  $("savedFilter").addEventListener("change", renderSaved);
+  $("savedList").addEventListener("click", function (e) {
+    var el = e.target;
+    if (el.dataset.load) {
+      var b = bids.find(function (x) { return x.id === el.dataset.load; });
+      if (b) { current = JSON.parse(JSON.stringify(b)); fillBidForm(); currentFromSaved = true; showTab("builder"); toast("Bid loaded"); }
+    } else if (el.dataset.send) {
+      var b3 = bids.find(function (x) { return x.id === el.dataset.send; });
+      if (b3) { current = JSON.parse(JSON.stringify(b3)); fillBidForm(); currentFromSaved = true; showTab("quote"); toast("Ready to send \u2014 pick Email, Text, WhatsApp, or Wave below the quote"); }
+    } else if (el.dataset.dup) {
+      var src = bids.find(function (x) { return x.id === el.dataset.dup; });
+      if (src) {
+        var dup = JSON.parse(JSON.stringify(src));
+        dup.id = uid(); dup.status = "open"; dup.savedAt = new Date().toISOString(); delete dup.closeout; /* the copy is a new bid — it has not been worked yet */
+        if (dup.customer && !/\(copy\)$/.test(dup.customer)) dup.customer += " (copy)";
+        bids.unshift(dup); persistBids(); renderSaved(); toast("Bid duplicated");
+      }
+    } else if (el.dataset.status && el.dataset.id) {
+      var b2 = bids.find(function (x) { return x.id === el.dataset.id; });
+      if (b2) { b2.status = el.dataset.status; persistBids(); renderSaved(); }
+    } else if (el.dataset.del) {
+      if (confirm("Delete this saved bid? This cannot be undone.")) {
+        bids = bids.filter(function (x) { return x.id !== el.dataset.del; });
+        persistBids(); renderSaved(); toast("Bid deleted");
+      }
+    }
+  });
+
+  $("printQuoteBtn").addEventListener("click", function () { renderQuote(); window.print(); });
+  $("backToBuilderBtn").addEventListener("click", function () { showTab("builder"); });
+
+  $("saveSettingsBtn").addEventListener("click", function () { readSettingsForm(); saveSettings(); fillSettingsForm(); refreshPricing(); toast("Settings saved"); });
+  $("resetSettingsBtn").addEventListener("click", function () {
+    if (confirm("Reset all business settings to the defaults?")) { settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); saveSettings(); fillSettingsForm(); refreshPricing(); toast("Defaults restored"); }
+  });
+  ["setCompany", "setPhone", "setEmail", "setLabor", "setEquip", "setOverhead", "setMargin", "setTravel", "setTaxRate", "setHaulBase", "setHaulRemoval", "setChipFee"].forEach(function (id) {
+    $(id).addEventListener("input", function () { readSettingsForm(); saveSettings(); $("headerCompany").innerHTML = esc(companyIsPlaceholder(settings.company) ? "Your Company" : settings.company) + (settings.phone ? "<br>" + esc(settings.phone) : ""); refreshPricing(); });
+  });
+  $("setTaxOn").addEventListener("change", function () { readSettingsForm(); saveSettings(); refreshPricing(); });
+
+  $("exportBackupBtn").addEventListener("click", exportBackup);
+  $("importFile").addEventListener("change", function () { if (this.files && this.files[0]) importBackup(this.files[0]); this.value = ""; });
+
+  $("wipeBtn").addEventListener("click", function () {
+    if (confirm("Erase ALL saved bids and settings on this device? This cannot be undone.")) {
+      localStorage.removeItem(LS_BIDS); localStorage.removeItem(LS_SETTINGS);
+      bids = []; persistBids(); /* writes "[]" so the first-run example bid is not re-seeded on the next load */
+      settings = loadSettings(); current = blankBid();
+      fillSettingsForm(); fillBidForm(); toast("Everything erased");
+    }
+  });
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+
+<!-- ===== White Wolf Digital legal pattern (Terms v1.0) ===== -->
+<style>
+#legalOverlay{position:fixed;inset:0;z-index:99999;background:rgba(10,12,16,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:18px 12px}
+#legalOverlay .legal-box{background:#fff;color:#14181f;max-width:560px;width:100%;border-radius:14px;padding:22px 20px;margin:auto;box-shadow:0 12px 40px rgba(0,0,0,.4);position:relative}
+#legalOverlay h2{margin:0 0 2px;font-size:22px}
+#legalOverlay h3{margin:0 0 12px;font-size:17px}
+#legalOverlay .legal-sum{font-size:16px;line-height:1.55;margin:10px 0}
+#legalOverlay .legal-sum p{margin:4px 0;font-weight:600}
+#legalOverlay .legal-note{background:#fff4d6;border:1px solid #e5c96a;border-radius:8px;padding:8px 10px;margin:8px 0;font-size:14px}
+#legalAgreeBtn{min-height:52px;width:100%;font-size:17px;font-weight:700;margin-top:14px;cursor:pointer}
+#legalAgreeBtn:disabled{opacity:.45;cursor:not-allowed}
+#legalOverlay .legal-check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:15px;line-height:1.45;cursor:pointer;text-align:left}
+#legalOverlay .legal-check input{width:22px;height:22px;min-width:22px;margin:2px 0 0;cursor:pointer}
+#legalOverlay .legal-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+#legalOverlay .legal-row button{min-height:48px;flex:1 1 200px;cursor:pointer;font-size:15px}
+#legalFullView{position:absolute;inset:0;background:#fff;border-radius:14px;display:none;flex-direction:column;overflow:hidden}
+#legalFullView .legal-full-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #ddd}
+#legalFullText{overflow:auto;padding:14px 18px;font-size:14.5px;line-height:1.55;text-align:left}
+#legalBackBtn{min-height:48px;min-width:88px;cursor:pointer;font-size:15px;font-weight:700}
+#legalCard{text-align:left;font-size:14.5px;line-height:1.55}
+#legalCard h3{margin:16px 0 6px}
+#legalCard ul{margin:6px 0 6px 18px;padding:0}
+#legalPageBtn{min-height:48px;cursor:pointer;font-size:15px;font-weight:700;width:100%}
+.legal-scrollbox{max-height:46vh;overflow:auto;border:1px solid #ddd;border-radius:8px;padding:10px 14px;margin-top:8px}
+</style>
+<script>
+"use strict";
+/* ===== Legal pattern: first-run Terms acceptance + Settings > Legal ===== */
+var TERMS_VERSION = "1.0";
+var LEGAL_APP_NAME = "BranchMath";
+var LEGAL_KEY = "treebidpro_settings_v1";
+var LEGAL_KEYS = ["treebidpro_settings_v1"];
+var LEGAL_GLOBAL = "settings";
+var LEGAL_HAS_DISCLAIMER = true;
+var LEGAL_SETTINGS_SEL = "#panel-settings";
+var LEGAL_TERMS_HTML = "<h2>Terms of Use \u2014 White Wolf Digital Apps</h2>\n<p><strong>Version 1.0 (DRAFT \u2014 pending attorney review)</strong> <strong>Seller: White Wolf Tree Service LLC, selling digital products under the name &quot;White Wolf Digital&quot;</strong> <strong>Contact: whitewolfbackoffice@gmail.com</strong></p>\n<h3>1. What you&#x27;re buying</h3>\n<p>Our apps (including ForgeFit AI, ForgeKitchen, BranchMath, SnowBid, WashPrice Pro, RoofSquares, JobProfit Tracker, PastureLedger, and the other titles sold under White Wolf Digital) are single-file software tools. When you buy one, you are buying a <strong>license to use the file</strong>, not ownership of the software itself.</p>\n<h3>2. Your license</h3>\n<ul>\n<li>You may use the app for your own personal or business work.</li>\n<li>You may open it on your own devices (phone, tablet, computer) and move your own data between them using the app&#x27;s built-in backup/export tools.</li>\n<li>You may <strong>not</strong> resell, redistribute, give away, upload, or share the app file (or a copy of it) with anyone else \u2014 including posting it online, bundling it with other products, or selling access to it.</li>\n<li>You may <strong>not</strong> claim the app as your own work, remove its branding or notices, or use it to build a competing product for resale.</li>\n<li>One purchase = one buyer. A business purchase covers the buyer and their own employees using it for that business&#x27;s work; it does not cover other businesses.</li>\n</ul>\n<h3>3. Your data stays yours \u2014 and stays on your device</h3>\n<ul>\n<li>The current versions of our apps run <strong>entirely on your device</strong>. They have no accounts, no sign-in, no analytics, and they collect, transmit, and store <strong>none</strong> of your information on any server. We never see your data.</li>\n<li>Your records are stored in your browser/app storage on your device. **You are responsible for backing them up** using the app&#x27;s export tools. If you clear your browser data, lose your device, or uninstall the app, your records may be permanently lost, and we cannot recover them \u2014 we never had a copy.</li>\n<li>Files you export (backups, quotes, PDFs) are under your control. Where you store or send them is up to you.</li>\n</ul>\n<h3>4. Estimates are tools, not guarantees</h3>\n<p>Every number our apps produce \u2014 bids, prices, costs, calorie targets, projections, schedules, totals \u2014 is an <strong>estimate generated from the information you enter and the settings you choose</strong>. Outputs are aids for your own judgment, not guarantees of price, profit, outcome, or result. You are responsible for checking any output before relying on it (see also the disclaimer that applies to your app: Health Disclaimer for fitness/nutrition apps, Estimator Disclaimer for contractor tools). If an input is wrong, the output will be wrong.</p>\n<h3>5. Acceptable use</h3>\n<p>Don&#x27;t use the apps to break the law, infringe anyone&#x27;s rights, or misrepresent quotes, invoices, or records to your own customers. For the fitness apps, the guardrails in the app (healthy-rate limits, calorie floor) are part of the product \u2014 don&#x27;t treat the app as a way around them.</p>\n<h3>6. Provided &quot;as is&quot;</h3>\n<p>The apps are provided <strong>&quot;as is&quot; and &quot;as available,&quot; without warranties of any kind</strong>, express or implied \u2014 including merchantability, fitness for a particular purpose, accuracy of calculations, and uninterrupted or error-free operation \u2014 to the maximum extent allowed by law. Software has bugs; browsers change; we work to fix problems but do not promise any app is error-free or will work on every device or browser forever.</p>\n<h3>7. Limitation of liability</h3>\n<p>To the maximum extent allowed by law:</p>\n<ul>\n<li>We are **not liable for indirect, incidental, special, or consequential damages** \u2014 including lost profits, lost or mispriced jobs, lost data, or business interruption \u2014 arising from use of the apps.</li>\n<li>Our total liability for any claim connected to an app is limited to the <strong>amount you paid for that app</strong>.</li>\n<li>Nothing in these terms limits liability that cannot legally be limited.</li>\n</ul>\n<h3>8. Refunds</h3>\n<p>Refunds are handled <strong>by the storefront you bought from, under that storefront&#x27;s policy</strong> \u2014 Gumroad&#x27;s refund policy for Gumroad purchases, and Google Play&#x27;s refund policy for Play purchases. These terms do not add to, replace, or override the storefront&#x27;s refund rules. If a file is defective and won&#x27;t open, contact us at whitewolfbackoffice@gmail.com and we&#x27;ll fix or replace the file.</p>\n<h3>9. Updates and changes to these terms</h3>\n<ul>\n<li>We may release updated versions of an app. Updates may add, change, or remove features.</li>\n<li>We may update these terms. The version you agreed to is recorded in the app (version number and date) at first-run acceptance. If terms change, the app may ask you to accept the new version once on next open. Updated terms apply going forward, not retroactively.</li>\n<li>If you don&#x27;t agree to an updated version of the terms, stop using the app.</li>\n</ul>\n<h3>10. Governing law</h3>\n<p>These terms are governed by the laws of the <strong>State of Oklahoma</strong>, USA. (Attorney to confirm governing law and venue before publication.)</p>\n<h3>11. Contact</h3>\n<p>White Wolf Tree Service LLC (White Wolf Digital) \u2014 whitewolfbackoffice@gmail.com.</p>\n<h3>CONNECTED FEATURES \u2014 takes effect only when these features ship</h3>\n<p><em>The sections below apply only to future connected features (device sync via Health Connect, AI voice logging, and the AI Goal Preview in ForgeFit). They do not apply to the current offline versions, which never transmit data.</em></p>\n<ul>\n<li><strong>Opt-in only.</strong> Connected features are off by default. Each one asks for your separate, explicit consent \u2014 on its own consent screen, in plain language \u2014 before anything leaves your device. Declining never disables the app&#x27;s offline features.</li>\n<li><strong>What gets sent.</strong> Only what the consent screen names, only when you use the feature: for example, a meal description (text, or audio only if cloud transcription is on) for AI voice logging, or the single photo you choose for an AI Goal Preview.</li>\n<li><strong>No retention by us.</strong> Our relay service passes your request to the named AI provider and keeps nothing \u2014 no copies of your photos, audio, transcripts, or entries are stored on our servers. Provider handling is described on the consent screen and in the Privacy Policy.</li>\n<li><strong>Health data stays on the device.</strong> Device sync (Health Connect) reads your health data on your phone and stores it in the app on your phone. It is not uploaded to us.</li>\n<li><strong>Allowances.</strong> Some connected features run on third-party AI services we pay for per use, so they may include a monthly allowance described in the app (for example, a set number of AI previews or voice entries per month), with optional additional credits. Allowances and pricing will be shown in the app before you use the feature; they are not a subscription unless the app says so in plain words.</li>\n<li><strong>Permissions.</strong> Connected features may request device permissions (such as Health Connect access or the microphone) at the moment you first use them. You can revoke permissions any time in your device settings; the related feature will simply stop working.</li>\n</ul>";
+var LEGAL_DISC_HTML = "<h2>Estimator Disclaimer \u2014 Contractor &amp; Trade Tools</h2>\n<p><strong>Applies to: BranchMath, SnowBid, WashPrice Pro, RoofSquares, JobProfit Tracker, FieldForms Toolkit, PaintPro, FenceDeck, MarketMaker, and the other estimating/pricing tools sold under White Wolf Digital \u2014 including bundles that contain them.</strong></p>\n<h3>Estimating aids, not finished quotes</h3>\n<ul>\n<li>These apps are <strong>estimating and record-keeping aids</strong>. Every bid, price, cost, measurement, and total they produce is an **estimate based on the information and rates you enter**.</li>\n<li>**You \u2014 the business owner \u2014 are responsible for verifying everything before you quote a customer:** measurements and quantities, site conditions, your current material and labor costs, your rates and margins, taxes, permit and license requirements, disposal rules, and any contract terms.</li>\n<li>Default rates, presets, and sample data included in the apps are starting points only. They are not market prices, not industry standards, and not a recommendation of what you should charge.</li>\n<li>A saved quote keeps the prices in effect when you created it (price snapshot). Changing your presets later does not change saved quotes \u2014 and a saved quote is still your responsibility to review before sending.</li>\n</ul>\n<h3>Specific tools</h3>\n<ul>\n<li><strong>BranchMath:</strong> tree work is dangerous and site-specific. Difficulty factors and presets cannot see the actual tree, lean, rot, targets, or access. Inspect every job in person before final pricing. The &quot;Invoice with Wave&quot; feature is an open-and-paste handoff \u2014 BranchMath does not connect to Wave, and the invoice you send from Wave is yours.</li>\n<li><strong>RoofSquares / measurement tools:</strong> confirm roof measurements and pitch in person or by your usual method before ordering materials.</li>\n<li><strong>SnowBid / seasonal tools:</strong> route times, snowfall amounts, and service pricing vary by storm and site; seasonal contracts are your agreement with your customer, on your terms.</li>\n<li><strong>JobProfit Tracker:</strong> profit figures depend on the costs you enter. The app is not accounting or tax software and does not replace your bookkeeper or accountant.</li>\n</ul>\n<h3>Bottom line</h3>\n<p>If an output and your judgment disagree, trust your judgment \u2014 then fix the input. We are not responsible for jobs won, lost, or mispriced based on app outputs, within the limits of the Terms of Use.</p>";
+var LEGAL_PRIVACY_HTML = "<h3>Privacy</h3><p>This app has no accounts and no sign-in. It collects no data, runs no analytics, and sends nothing anywhere &mdash; everything you enter is stored only on this device, in this browser/app storage. We never see your data. You are responsible for backing up your records with the app&rsquo;s export tools; files you export are under your control.</p>";
+var __legalRecord = null;
+var __legalOrigSet = localStorage.setItem.bind(localStorage);
+function __legalReadStored(){
+  try { var raw = localStorage.getItem(LEGAL_KEY); if(!raw) return null; var p = JSON.parse(raw); return (p && typeof p === "object") ? p : null; } catch(e){ return null; }
+}
+function __legalAdopt(rec){ if(rec && rec.termsVersion){ __legalRecord = { termsVersion: String(rec.termsVersion), acceptedDate: rec.acceptedDate || "", disclaimerShown: !!rec.disclaimerShown }; } }
+(function(){
+  var stored = __legalReadStored();
+  if (stored && stored.legal) __legalAdopt(stored.legal);
+})();
+/* Keep the acceptance inside the app's own saved state: adopt any legal record the app writes,
+   and re-attach the known record when an app save would otherwise drop it. */
+localStorage.setItem = function(k, v){
+  if (LEGAL_KEYS.indexOf(k) >= 0 && typeof v === "string"){
+    try {
+      var p = JSON.parse(v);
+      if (p && typeof p === "object" && !Array.isArray(p)){
+        if (p.legal) __legalAdopt(p.legal);
+        else if (__legalRecord && k === LEGAL_KEY){ p.legal = __legalRecord; v = JSON.stringify(p); }
+      }
+    } catch(e){}
+  }
+  return __legalOrigSet(k, v);
+};
+function __legalVersionOlder(a, b){
+  var pa = String(a||"0").split("."), pb = String(b||"0").split(".");
+  for (var i = 0; i < Math.max(pa.length, pb.length); i++){ var x = parseInt(pa[i]||"0",10)||0, y = parseInt(pb[i]||"0",10)||0; if (x < y) return true; if (x > y) return false; }
+  return false;
+}
+function __legalAcceptLine(){
+  if (__legalRecord && __legalRecord.acceptedDate) return "You agreed to Terms v" + __legalRecord.termsVersion + " on " + __legalRecord.acceptedDate + ".";
+  return "Terms acceptance not yet recorded.";
+}
+function __legalRenderAcceptLine(){
+  var el = document.getElementById("legalAcceptLine");
+  if (el) el.textContent = __legalAcceptLine();
+}
+function __legalBuildPage(){
+  var sec = document.querySelector(LEGAL_SETTINGS_SEL);
+  if (!sec || document.getElementById("legalCard")) return;
+  var wrap = document.createElement("div");
+  wrap.className = "card";
+  wrap.style.marginTop = "14px";
+  var discSection = LEGAL_HAS_DISCLAIMER ? '<h3>Estimator Disclaimer</h3><div class="legal-scrollbox">' + LEGAL_DISC_HTML + "</div>" : "";
+  wrap.innerHTML = '<h2>Legal</h2>'
+    + '<p><button type="button" id="legalPageBtn">Legal &mdash; Terms, ' + (LEGAL_HAS_DISCLAIMER ? "Disclaimer" : "") + ' &amp; Privacy</button></p>'
+    + '<div id="legalCard" style="display:none">'
+    + '<p id="legalAcceptLine"></p>'
+    + "<h3>Terms of Use</h3>" + '<div class="legal-scrollbox">' + LEGAL_TERMS_HTML + "</div>"
+    + discSection
+    + LEGAL_PRIVACY_HTML
+    + '<p><strong>Sold by:</strong> White Wolf Tree Service LLC (White Wolf Digital) &mdash; whitewolfbackoffice@gmail.com</p>'
+    + "</div>";
+  sec.appendChild(wrap);
+  document.getElementById("legalPageBtn").addEventListener("click", function(){
+    var card = document.getElementById("legalCard");
+    card.style.display = (card.style.display === "none") ? "block" : "none";
+    __legalRenderAcceptLine();
+    if (card.style.display === "block"){ try { card.scrollIntoView({block:"start"}); } catch(e){} }
+  });
+  __legalRenderAcceptLine();
+}
+function __legalShowFull(kind){
+  var fv = document.getElementById("legalFullView");
+  var ft = document.getElementById("legalFullText");
+  var fh = document.getElementById("legalFullTitle");
+  if (!fv || !ft) return;
+  if (kind === "disclaimer"){ ft.innerHTML = LEGAL_DISC_HTML; if (fh) fh.textContent = "Estimator Disclaimer"; }
+  else { ft.innerHTML = LEGAL_TERMS_HTML; if (fh) fh.textContent = "Terms of Use"; }
+  fv.style.display = "flex";
+  ft.scrollTop = 0;
+}
+function __legalMaybePrompt(){
+  var stored = __legalReadStored();
+  var rec = stored && stored.legal ? stored.legal : null;
+  if (rec) __legalAdopt(rec);
+  var need = false, updated = false;
+  if (!rec) need = true;
+  else if (__legalVersionOlder(rec.termsVersion, TERMS_VERSION)){ need = true; updated = true; }
+  var ov = document.getElementById("legalOverlay");
+  if (!ov) return;
+  if (need){
+    var note = document.getElementById("legalUpdatedNote");
+    if (note) note.style.display = updated ? "block" : "none";
+    var chk0 = document.getElementById("legalAgreeCheck");
+    var ab0 = document.getElementById("legalAgreeBtn");
+    if (chk0) chk0.checked = false;
+    if (ab0) ab0.disabled = true;
+    ov.style.display = "flex";
+  } else {
+    ov.style.display = "none";
+  }
+  __legalRenderAcceptLine();
+}
+function __legalAgree(){
+  var chkA = document.getElementById("legalAgreeCheck");
+  if (chkA && !chkA.checked) return;
+  var d = new Date();
+  var iso = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  __legalRecord = { termsVersion: TERMS_VERSION, acceptedDate: iso, disclaimerShown: LEGAL_HAS_DISCLAIMER };
+  try { var g = window[LEGAL_GLOBAL]; if (g && typeof g === "object") g.legal = __legalRecord; } catch(e){}
+  try {
+    var stored = __legalReadStored();
+    if (stored){ stored.legal = __legalRecord; __legalOrigSet(LEGAL_KEY, JSON.stringify(stored)); }
+    else { var g2 = window[LEGAL_GLOBAL]; if (g2 && typeof g2 === "object") __legalOrigSet(LEGAL_KEY, JSON.stringify(g2)); }
+  } catch(e){}
+  var ov = document.getElementById("legalOverlay");
+  if (ov) ov.style.display = "none";
+  __legalRenderAcceptLine();
+}
+function __legalBuildOverlay(){
+  if (document.getElementById("legalOverlay")) return;
+  var ov = document.createElement("div");
+  ov.id = "legalOverlay";
+  ov.style.display = "none";
+  var discBtn = LEGAL_HAS_DISCLAIMER ? '<button type="button" id="legalDisclaimerBtn">Read the Estimator Disclaimer</button>' : "";
+  var followLine = LEGAL_HAS_DISCLAIMER
+    ? "The full Terms and Disclaimer are one tap away, now and any time in Settings &rarr; Legal."
+    : "The full Terms are one tap away, now and any time in Settings &rarr; Legal.";
+  var checkLabel = LEGAL_HAS_DISCLAIMER
+    ? "I have read the disclaimer and I agree to the Terms of Use"
+    : "I have read and I agree to the Terms of Use";
+  ov.innerHTML = '<div class="legal-box" role="dialog" aria-modal="true" aria-label="Terms of Use">'
+    + "<h2>" + LEGAL_APP_NAME + "</h2><h3>Terms of Use</h3>"
+    + '<div class="legal-note" id="legalUpdatedNote" style="display:none">Our terms were updated (v' + TERMS_VERSION + ").</div>"
+    + '<div class="legal-sum"><p>Your data stays on your device.</p>'
+    + "<p>Estimates are aids, not guarantees.</p>"
+    + "<p>You're responsible for checking outputs before you rely on them.</p></div>"
+    + "<p>" + followLine + "</p>"
+    + '<div class="legal-row"><button type="button" id="legalTermsBtn">Read the full Terms</button>' + discBtn + "</div>"
+    + '<label class="legal-check"><input type="checkbox" id="legalAgreeCheck"> <span>' + checkLabel + '</span></label>'
+    + '<button type="button" id="legalAgreeBtn" disabled>I Agree</button>'
+    + '<div id="legalFullView"><div class="legal-full-head"><button type="button" id="legalBackBtn">&larr; Back</button><strong id="legalFullTitle">Terms of Use</strong></div><div id="legalFullText"></div></div>'
+    + "</div>";
+  document.body.appendChild(ov);
+  document.getElementById("legalAgreeBtn").addEventListener("click", __legalAgree);
+  var agreeChk = document.getElementById("legalAgreeCheck");
+  var agreeBtn = document.getElementById("legalAgreeBtn");
+  if (agreeChk && agreeBtn) agreeChk.addEventListener("change", function(){ agreeBtn.disabled = !agreeChk.checked; });
+  document.getElementById("legalTermsBtn").addEventListener("click", function(){ __legalShowFull("terms"); });
+  var db = document.getElementById("legalDisclaimerBtn");
+  if (db) db.addEventListener("click", function(){ __legalShowFull("disclaimer"); });
+  document.getElementById("legalBackBtn").addEventListener("click", function(){ document.getElementById("legalFullView").style.display = "none"; });
+}
+__legalBuildOverlay();
+__legalBuildPage();
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function(){ __legalBuildOverlay(); __legalBuildPage(); __legalMaybePrompt(); });
+else __legalMaybePrompt();
+</script>
+
+<!-- vv:voice-dictation v1.0 (QA-STANDARD §9a) — shared snippet, see hidden_files/voice-layer/ -->
+<script>
+/* ============================================================================
+   SHARED VOICE DICTATION LAYER — "vv" snippet v1.0 (2026-10-29)
+   Governing standard: QA-STANDARD.md §9a (mic dictation on every data-entry
+   field). Built once, dropped into every catalog app verbatim. Do not fork
+   per app — fix here and re-drop.
+
+   What it does:
+   - Adds a >=48px mic button beside every text input, number input, and
+     textarea (an <input> with no type attribute counts as text). Selects,
+     checkboxes, radios, file/date/tel/email inputs are NOT wired — they keep
+     their native pickers/keyboards (per voice-retrofit-plan.md counting).
+   - Tap the mic -> Web Speech API dictation into that field, exactly as if
+     typed. Interim words show live in the field; nothing auto-submits.
+   - Number fields: spoken numbers are converted ("sixty five" -> 65,
+     "two point five" -> 2.5, "1,200" -> 1200). If the words can't be read as
+     a number, the field is left untouched and the user is told plainly.
+   - After a successful dictation the field receives real bubbling "input"
+     and "change" events, so the host app's own handlers fire exactly as if
+     the user typed.
+   - Fields added later (re-renders, add-row buttons) are wired automatically
+     via MutationObserver.
+   - No SpeechRecognition (Firefox, file:// copies in most browsers, denied
+     permission): the mic shows the honest note "Voice isn't available on
+     this device/browser — typing works as always" and typing is never
+     blocked, hidden, or degraded.
+   - Failed/empty recognition announces "Didn't catch that — try again or
+     type it" and restores the field's previous value.
+
+   Wiring (see README.md in this folder): paste this whole IIFE in a <script>
+   block just before </body>. It injects its own styles (#vv-style) — no
+   other changes needed. It never touches storage, prices, or app state.
+   ============================================================================ */
+(function () {
+  "use strict";
+  if (window.__vvDictation) return; // drop-in twice = wire once
+  window.__vvDictation = "1.0";
+
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  var FALLBACK_MSG = "Voice isn't available on this device/browser — typing works as always";
+  var MISSED_MSG = "Didn't catch that — try again or type it";
+  var BLOCKED_MSG = "Microphone is blocked — typing works as always. Check the browser's mic permission if you want voice.";
+
+  /* ---- styles (self-injected; dictation-snippet.css holds the same rules) ---- */
+  var CSS = [
+    ".vv-wrap{display:flex;gap:6px;align-items:flex-start}",
+    ".vv-wrap>input,.vv-wrap>textarea{flex:1 1 0;min-width:0}",
+    ".vv-mic{flex:0 0 auto;width:48px;min-width:48px;height:48px;border-radius:8px;border:1px solid #b9c2ba;background:#fff;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent}",
+    ".vv-mic:active{transform:scale(.96)}",
+    ".vv-mic.vv-live{background:#b3372e;border-color:#b3372e;animation:vvpulse 1s ease-in-out infinite}",
+    "@keyframes vvpulse{0%,100%{opacity:1}50%{opacity:.5}}",
+    ".vv-status{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);max-width:min(92vw,480px);background:#1c2420;color:#fff;padding:10px 14px;border-radius:9px;font-size:14px;line-height:1.35;z-index:99999;box-shadow:0 4px 18px rgba(0,0,0,.25);display:none;text-align:center;pointer-events:none}",
+    ".vv-status.vv-show{display:block}",
+    "@media print{.vv-mic{display:none!important}.vv-status{display:none!important}}"
+  ].join("\n");
+  if (!document.getElementById("vv-style")) {
+    var st = document.createElement("style");
+    st.id = "vv-style"; st.textContent = CSS;
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  /* ---- status announcements ---- */
+  var statusEl = null, statusTimer = null;
+  function say(msg, ms) {
+    if (!statusEl) {
+      statusEl = document.createElement("div");
+      statusEl.className = "vv-status"; statusEl.setAttribute("role", "status");
+      statusEl.setAttribute("aria-live", "polite");
+      document.body.appendChild(statusEl);
+    }
+    statusEl.textContent = msg;
+    statusEl.classList.add("vv-show");
+    if (statusTimer) clearTimeout(statusTimer);
+    statusTimer = setTimeout(function () { statusEl.classList.remove("vv-show"); }, ms || 5000);
+  }
+
+  /* ---- spoken-number conversion ---- */
+  var ONES = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19 };
+  var TENS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+  function wordsToNumber(s) {
+    var words = s.split(/[\s-]+/), total = 0, current = 0, seen = false, decimal = null, decPlace = 0.1, neg = false;
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i];
+      if (!w || w === "and") continue;
+      if (w === "minus" || w === "negative") { neg = true; continue; }
+      if (w === "point") { decimal = true; continue; }
+      if (decimal) {
+        if (ONES.hasOwnProperty(w) && ONES[w] < 10) { if (decimal === true) decimal = 0; decimal += ONES[w] * decPlace; decPlace /= 10; seen = true; }
+        continue;
+      }
+      if (ONES.hasOwnProperty(w)) { current += ONES[w]; seen = true; }
+      else if (TENS.hasOwnProperty(w)) { current += TENS[w]; seen = true; }
+      else if (w === "hundred") { current = (current || 1) * 100; seen = true; }
+      else if (w === "thousand") { total += (current || 1) * 1000; current = 0; seen = true; }
+      else if (w === "million") { total += (current || 1) * 1000000; current = 0; seen = true; }
+      else if (w === "a" || w === "an") { /* filler before hundred/thousand */ }
+      /* any other word (dollars, feet, hours…) is ignored filler */
+    }
+    if (!seen) return null;
+    var n = total + current + (decimal ? decimal : 0);
+    return neg ? -n : n;
+  }
+  function parseSpokenNumber(raw) {
+    if (!raw) return null;
+    var s = String(raw).toLowerCase().replace(/\$/g, " ").replace(/\s+/g, " ").trim();
+    s = s.replace(/(\d),(?=\d)/g, "$1").replace(/,/g, " "); // 1,200 -> 1200
+    var m = s.match(/-?\d+(?:\.\d+)?/);
+    if (m) { var n = parseFloat(m[0]); if (isFinite(n)) return n; }
+    return wordsToNumber(s);
+  }
+
+  /* ---- field helpers ---- */
+  function isWirable(f) {
+    if (!f || f.dataset.vvWired) return false;
+    if (f.tagName === "TEXTAREA") return !(f.disabled || f.readOnly);
+    if (f.tagName !== "INPUT") return false;
+    var t = (f.getAttribute("type") || "text").toLowerCase();
+    if (t !== "text" && t !== "number") return false;
+    return !(f.disabled || f.readOnly);
+  }
+  function labelFor(f) {
+    var name = "";
+    if (f.id) {
+      var lab = document.querySelector('label[for="' + f.id + '"]');
+      if (lab) name = lab.textContent;
+    }
+    if (!name) {
+      var prev = f.closest ? f.closest("div") : null;
+      var l2 = prev ? prev.querySelector("label") : null;
+      if (l2) name = l2.textContent;
+    }
+    if (!name) name = f.getAttribute("placeholder") || f.getAttribute("name") || "field";
+    return String(name).replace(/\s+/g, " ").trim().slice(0, 60) || "field";
+  }
+  function fireEvents(f) {
+    ["input", "change"].forEach(function (type) {
+      var ev;
+      try { ev = new Event(type, { bubbles: true, composed: true }); }
+      catch (e) { ev = document.createEvent("Event"); ev.initEvent(type, true, true); }
+      f.dispatchEvent(ev);
+    });
+  }
+  function joinText(base, add) {
+    if (!base) return add;
+    if (!add) return base;
+    return base + (/\s$/.test(base) ? "" : " ") + add;
+  }
+
+  /* ---- dictation session ---- */
+  var active = null; // { rec, field, btn, base, finalText, gotResult, done }
+  function stopActive() { if (active && active.rec) { try { active.rec.stop(); } catch (e) {} } }
+  function startDictation(field, btn) {
+    if (active && active.field === field) { stopActive(); return; } // tap again = stop
+    if (active) stopActive();
+    if (!SR) { say(FALLBACK_MSG, 6000); return; }
+    var rec;
+    try { rec = new SR(); } catch (e) { say(FALLBACK_MSG, 6000); return; }
+    var session = { rec: rec, field: field, btn: btn, base: field.value || "", finalText: "", gotResult: false, done: false };
+    active = session;
+    rec.lang = (document.documentElement.getAttribute("lang") || "en-US");
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+    btn.classList.add("vv-live");
+    btn.setAttribute("aria-label", "Listening — tap to stop");
+    say("Listening… speak now.");
+    rec.onresult = function (ev) {
+      var interim = "", finalT = "";
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var r = ev.results[i];
+        if (r.isFinal) finalT += r[0].transcript; else interim += r[0].transcript;
+      }
+      if (finalT) { session.finalText = joinText(session.finalText, finalT.trim()); session.gotResult = true; }
+      var shown = joinText(session.finalText, interim.trim());
+      if (field.type !== "number") field.value = joinText(session.base, shown);
+      else if (shown) field.value = shown; // numbers: show the words until they resolve on end
+    };
+    rec.onerror = function (ev) {
+      if (session.done) return;
+      session.done = true;
+      field.value = session.base;
+      cleanup(session);
+      if (ev && (ev.error === "not-allowed" || ev.error === "service-not-allowed")) say(BLOCKED_MSG, 6500);
+      else if (ev && ev.error === "not-supported") say(FALLBACK_MSG, 6000);
+      else say(MISSED_MSG, 5000);
+    };
+    rec.onend = function () {
+      if (session.done) return;
+      session.done = true;
+      cleanup(session);
+      var heard = (session.finalText || "").trim();
+      if (!heard) { field.value = session.base; say(MISSED_MSG, 5000); return; }
+      if (field.type === "number") {
+        var n = parseSpokenNumber(heard);
+        if (n === null || !isFinite(n)) { field.value = session.base; say(MISSED_MSG, 5000); return; }
+        field.value = String(n);
+      } else {
+        field.value = joinText(session.base, heard);
+      }
+      fireEvents(field);
+      try { field.focus({ preventScroll: false }); } catch (e) {}
+      say("Added: " + heard, 3000);
+    };
+    try { rec.start(); } catch (e) { session.done = true; cleanup(session); field.value = session.base; say(MISSED_MSG, 5000); }
+  }
+  function cleanup(session) {
+    if (active === session) active = null;
+    if (session.btn) { session.btn.classList.remove("vv-live"); session.btn.setAttribute("aria-label", session.btn.dataset.vvLabel || "Voice entry"); }
+  }
+
+  /* ---- wiring ---- */
+  function wireField(f) {
+    if (!isWirable(f)) return;
+    f.dataset.vvWired = "1";
+    var wrap = document.createElement("span");
+    wrap.className = "vv-wrap";
+    f.parentNode.insertBefore(wrap, f);
+    wrap.appendChild(f);
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "vv-mic";
+    btn.innerHTML = "🎤";
+    var lab = "Voice entry for " + labelFor(f);
+    btn.dataset.vvLabel = lab;
+    btn.setAttribute("aria-label", lab);
+    btn.title = "Voice entry";
+    btn.addEventListener("click", function () { startDictation(f, btn); });
+    wrap.appendChild(btn);
+  }
+  function scan(root) {
+    if (!root || !root.querySelectorAll) return;
+    var fields = root.querySelectorAll("input, textarea");
+    for (var i = 0; i < fields.length; i++) wireField(fields[i]);
+    if (root.tagName && (root.tagName === "INPUT" || root.tagName === "TEXTAREA")) wireField(root);
+  }
+
+  function init() {
+    scan(document);
+    if (window.MutationObserver && document.body) {
+      var pending = false;
+      var obs = new MutationObserver(function (muts) {
+        var hasAdds = false;
+        for (var i = 0; i < muts.length; i++) if (muts[i].addedNodes.length) { hasAdds = true; break; }
+        if (!hasAdds || pending) return;
+        pending = true;
+        setTimeout(function () { pending = false; scan(document); }, 60);
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+
+  /* exposed for QA harnesses and future Tell flows */
+  window.__vv = { version: "1.0", supported: !!SR, parseSpokenNumber: parseSpokenNumber, fallbackMessage: FALLBACK_MSG, missedMessage: MISSED_MSG };
+})();
+
+</script>
+
+</body>
+</html>
