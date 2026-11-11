@@ -1,0 +1,202 @@
+{
+  "bids": [
+    {
+      "id": "mackey-reduction-2026-11-12",
+      "customer": "Chris Mackey — Reduction (both trees)",
+      "phone": "",
+      "email": "",
+      "address": "299 East Potter St, Colcord, OK",
+      "date": "2026-11-12",
+      "crewSize": 3,
+      "disposal": "haul",
+      "travelMiles": 0,
+      "extras": 0,
+      "notes": "Trees behind the house, right behind the school in Colcord. Dead oak hangs over the carport — all work on the dead oak is done from a lift; no climbing on the dead tree. Prices include cutting, clean-up, and haul-off. Full options: dead oak reduced by itself $950; second oak reduced by itself $600; both reduced $1,400 (this quote). Or remove instead: dead oak $2,250, second oak $1,650, both $3,400. Optional add-on on removals: stump grinding $175 per stump (stumps cut flush included in removal prices).",
+      "internalNotes": "Marketplace lead from the Nov 11 ad. Quote visit Thu Nov 12, 1 PM. Prices set by Muse with Travis 2026-11-11. Stump grinding $175/stump is an add-on, not in totals.",
+      "terms": "Quote valid for 30 days. Price includes the work listed above only; additional work will be quoted separately. Stump grinding is included only where listed. Payment due in full on completion unless other arrangements are made in writing before work begins. We are not responsible for damage to underground utilities, irrigation, or septic systems not marked by the property owner before work begins.",
+      "status": "open",
+      "items": [],
+      "payStatus": "unpaid",
+      "payMethod": "",
+      "depositAmt": 0,
+      "closeout": null,
+      "trees": [
+        {
+          "species": "Oak",
+          "height": 70,
+          "diameter": 30,
+          "work": "trim",
+          "hazards": {
+            "dead": true,
+            "leaning": false,
+            "structure": true,
+            "power": false
+          },
+          "access": "standard",
+          "hours": 3.75,
+          "location": "Back yard, over carport",
+          "stump": "none",
+          "wood": "",
+          "note": "",
+          "landing": "none",
+          "photos": []
+        },
+        {
+          "species": "Oak",
+          "height": 65,
+          "diameter": 26,
+          "work": "trim",
+          "hazards": {
+            "dead": false,
+            "leaning": false,
+            "structure": true,
+            "power": false
+          },
+          "access": "standard",
+          "hours": 3.5,
+          "location": "Back yard, next to the dead oak",
+          "stump": "none",
+          "wood": "",
+          "note": "",
+          "landing": "none",
+          "photos": []
+        }
+      ],
+      "total": 1400,
+      "snapshot": {
+        "lines": [
+          {
+            "desc": "Oak — Trim",
+            "detail": "Dead oak over carport — crown reduction from a lift, deadwood and roof-side weight removed, small-pieced down",
+            "amount": 950,
+            "photo": "",
+            "photos": []
+          },
+          {
+            "desc": "Oak — Trim",
+            "detail": "Second oak — crown reduction, deadwood and overhang taken back",
+            "amount": 600,
+            "photo": "",
+            "photos": []
+          },
+          {
+            "desc": "Package discount",
+            "detail": "Both trees reduced in one lift visit",
+            "amount": -150,
+            "photo": "",
+            "photos": []
+          }
+        ],
+        "recommended": 1400,
+        "taxAmt": 0,
+        "totalWithTax": 1400,
+        "taxEnabled": false,
+        "taxRate": 8.5,
+        "company": "White Wolf Tree Service LLC",
+        "phone": "918-691-1542",
+        "email": "whitewolfoklahoma@gmail.com",
+        "savedAt": "2026-11-11T22:08:23.112Z"
+      },
+      "savedAt": "2026-11-11T22:08:23.112Z"
+    },
+    {
+      "id": "mackey-removal-2026-11-12",
+      "customer": "Chris Mackey — Removal (both trees)",
+      "phone": "",
+      "email": "",
+      "address": "299 East Potter St, Colcord, OK",
+      "date": "2026-11-12",
+      "crewSize": 3,
+      "disposal": "haul",
+      "travelMiles": 0,
+      "extras": 0,
+      "notes": "Trees behind the house, right behind the school in Colcord. Dead oak hangs over the carport — all work on the dead oak is done from a lift; no climbing on the dead tree. Prices include cutting, clean-up, and haul-off. Full options: dead oak removed by itself $2,250; second oak removed by itself $1,650; both removed $3,400 (this quote). Or reduce instead of remove: dead oak $950, second oak $600, both $1,400. Optional add-on: stump grinding $175 per stump (stumps are cut flush in the prices above).",
+      "internalNotes": "Marketplace lead from the Nov 11 ad. Quote visit Thu Nov 12, 1 PM. Prices set by Muse with Travis 2026-11-11. Stump grinding $175/stump is an add-on, not in totals.",
+      "terms": "Quote valid for 30 days. Price includes the work listed above only; additional work will be quoted separately. Stump grinding is included only where listed. Payment due in full on completion unless other arrangements are made in writing before work begins. We are not responsible for damage to underground utilities, irrigation, or septic systems not marked by the property owner before work begins.",
+      "status": "open",
+      "items": [],
+      "payStatus": "unpaid",
+      "payMethod": "",
+      "depositAmt": 0,
+      "closeout": null,
+      "trees": [
+        {
+          "species": "Oak",
+          "height": 70,
+          "diameter": 30,
+          "work": "removal",
+          "hazards": {
+            "dead": true,
+            "leaning": false,
+            "structure": true,
+            "power": false
+          },
+          "access": "standard",
+          "hours": 6.25,
+          "location": "Back yard, over carport",
+          "stump": "leave",
+          "wood": "",
+          "note": "",
+          "landing": "none",
+          "photos": []
+        },
+        {
+          "species": "Oak",
+          "height": 65,
+          "diameter": 26,
+          "work": "removal",
+          "hazards": {
+            "dead": false,
+            "leaning": false,
+            "structure": true,
+            "power": false
+          },
+          "access": "standard",
+          "hours": 5.75,
+          "location": "Back yard, next to the dead oak",
+          "stump": "leave",
+          "wood": "",
+          "note": "",
+          "landing": "none",
+          "photos": []
+        }
+      ],
+      "total": 3400,
+      "snapshot": {
+        "lines": [
+          {
+            "desc": "Oak — Removal",
+            "detail": "Dead oak over carport — removed from a lift, debris hauled off, stump cut flush",
+            "amount": 2250,
+            "photo": "",
+            "photos": []
+          },
+          {
+            "desc": "Oak — Removal",
+            "detail": "Second oak — removal, debris hauled off, stump cut flush",
+            "amount": 1650,
+            "photo": "",
+            "photos": []
+          },
+          {
+            "desc": "Package discount",
+            "detail": "Both trees removed in one job",
+            "amount": -500,
+            "photo": "",
+            "photos": []
+          }
+        ],
+        "recommended": 3400,
+        "taxAmt": 0,
+        "totalWithTax": 3400,
+        "taxEnabled": false,
+        "taxRate": 8.5,
+        "company": "White Wolf Tree Service LLC",
+        "phone": "918-691-1542",
+        "email": "whitewolfoklahoma@gmail.com",
+        "savedAt": "2026-11-11T22:08:23.112Z"
+      },
+      "savedAt": "2026-11-11T22:08:23.112Z"
+    }
+  ]
+}
