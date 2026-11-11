@@ -140,6 +140,15 @@
 </nav>
 
 <main>
+<!-- ================= ADD-BID LINK CARD (v1.2.2) ================= -->
+<div class="card" id="addBidCard" style="display:none;border:2px solid var(--green);background:#eef6ee">
+  <h2 style="margin-top:0">&#127795; New bid ready to add</h2>
+  <p id="addBidSummary" style="font-size:15px;line-height:1.5;margin:4px 0 10px"></p>
+  <div class="btnrow">
+    <button class="btn" id="addBidAcceptBtn" type="button">Add this bid</button>
+    <button class="btn ghost" id="addBidDismissBtn" type="button">Not now</button>
+  </div>
+</div>
 <!-- ================= BID BUILDER ================= -->
 <section class="panel active" id="panel-builder">
   <div class="card">
@@ -396,7 +405,7 @@
 <script>
 "use strict";
 /* ============================== DATA ============================== */
-var APP_VERSION = "1.2.1";
+var APP_VERSION = "1.2.2";
 var LS_SETTINGS = "treebidpro_settings_v1";
 var LS_BIDS = "treebidpro_bids_v1";
 
@@ -1970,6 +1979,81 @@ else __legalMaybePrompt();
   window.__vv = { version: "1.0", supported: !!SR, parseSpokenNumber: parseSpokenNumber, fallbackMessage: FALLBACK_MSG, missedMessage: MISSED_MSG };
 })();
 
+</script>
+
+<script>
+"use strict";
+/* ================= ADD-BID LINK (v1.2.2) =================
+   A link of the form  <app-url>#addbid=<payload>  offers ONE ready-made bid
+   to the person opening the app. <payload> is base64url-encoded UTF-8 JSON of
+   a single bid object (the same shape as a stored bid). Nothing is added
+   without an explicit tap on "Add this bid"; an invalid payload is ignored
+   silently and the app behaves exactly as before. The fragment is stripped
+   as soon as it has been read, so a refresh never re-prompts. */
+(function () {
+  function addBidB64UrlDecode(str) {
+    var s = String(str).replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    var bin = atob(s);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder("utf-8").decode(bytes);
+  }
+  function addBidStripFragment() {
+    try { history.replaceState(null, document.title, location.pathname + location.search); } catch (e) {}
+  }
+  /* Runs on first load and again on any later hashchange, so a second
+     add-bid link tapped while the app is already open also works. */
+  function handleAddBidLink() {
+    var m = /#addbid=([A-Za-z0-9\-_]+)/.exec(location.hash || "");
+    if (!m) return;
+    var parsed = null;
+    try { parsed = JSON.parse(addBidB64UrlDecode(m[1])); } catch (e) { parsed = null; }
+    if (!parsed || typeof parsed !== "object" || typeof parsed.customer !== "string" || !parsed.customer.trim() || !Array.isArray(parsed.trees)) {
+      addBidStripFragment();
+      return;
+    }
+    var bid = normalizeBid(JSON.parse(JSON.stringify(parsed)));
+    if (!bid || typeof bid.customer !== "string" || !Array.isArray(bid.trees)) {
+      addBidStripFragment();
+      return;
+    }
+    var card = document.getElementById("addBidCard");
+    var summary = document.getElementById("addBidSummary");
+    var acceptBtn = document.getElementById("addBidAcceptBtn");
+    var dismissBtn = document.getElementById("addBidDismissBtn");
+    if (!card || !summary || !acceptBtn || !dismissBtn) { addBidStripFragment(); return; }
+    var total = NaN;
+    if (bid.snapshot && typeof bid.snapshot === "object") total = parseFloat(bid.snapshot.totalWithTax);
+    if (!isFinite(total)) total = parseFloat(bid.total);
+    if (!isFinite(total)) total = 0;
+    summary.innerHTML = "<strong>" + esc(bid.customer) + "</strong>" +
+      (bid.address ? "<br>" + esc(bid.address) : "") +
+      "<br>Bid total: <strong>" + money(total) + "</strong>" +
+      (bid.date ? "<br>Bid date: " + esc(bid.date) : "");
+    card.style.display = "block";
+    addBidStripFragment();
+    acceptBtn.onclick = function () {
+      var copy = JSON.parse(JSON.stringify(bid));
+      copy.id = uid();
+      copy.savedAt = new Date().toISOString();
+      bids.push(copy);
+      persistBids();
+      card.style.display = "none";
+      current = JSON.parse(JSON.stringify(copy));
+      fillBidForm();
+      currentFromSaved = true;
+      renderSaved();
+      showTab("builder");
+      toast("Bid added");
+    };
+    dismissBtn.onclick = function () {
+      card.style.display = "none";
+    };
+  }
+  window.addEventListener("hashchange", handleAddBidLink);
+  handleAddBidLink();
+})();
 </script>
 
 </body>
