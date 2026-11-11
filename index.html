@@ -140,7 +140,7 @@
 </nav>
 
 <main>
-<!-- ================= ADD-BID LINK CARD (v1.2.2) ================= -->
+<!-- ================= ADD-BID LINK CARD (v1.3.0) ================= -->
 <div class="card" id="addBidCard" style="display:none;border:2px solid var(--green);background:#eef6ee">
   <h2 style="margin-top:0">&#127795; New bid ready to add</h2>
   <p id="addBidSummary" style="font-size:15px;line-height:1.5;margin:4px 0 10px"></p>
@@ -391,8 +391,8 @@
     </div>
     <p class="hint">TreeFinder: list your tree service free, see local homeowner job requests, and pay nothing unless a job books and pays. BookedSolid: put the won job on your schedule — appointment buffers, a waitlist, deposit and no-show tracking, and a printable day sheet.</p>
     <p class="hint">Estimates only: BranchMath helps you price consistently, but site conditions, your judgment, and your local market make the final call. Always verify a bid before you send it.</p>
-    <p><strong>BranchMath v1.2.1</strong></p>
-    <p>Questions or trouble? <a class="btn" id="helpEmailBtn" href="mailto:whitewolfbackoffice@gmail.com?subject=BranchMath%20help%20%E2%80%94%20v1.2.1&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A">Email us</a></p>
+    <p><strong>BranchMath v1.3.0</strong></p>
+    <p>Questions or trouble? <a class="btn" id="helpEmailBtn" href="mailto:whitewolfbackoffice@gmail.com?subject=BranchMath%20help%20%E2%80%94%20v1.3.0&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A">Email us</a></p>
     <p class="hint">Photo analysis by AI is planned for a future connected edition of BranchMath — it is not available in this offline version, and nothing in this version analyzes your photos.</p>
   </div>
 </section>
@@ -405,7 +405,7 @@
 <script>
 "use strict";
 /* ============================== DATA ============================== */
-var APP_VERSION = "1.2.2";
+var APP_VERSION = "1.3.0";
 var LS_SETTINGS = "treebidpro_settings_v1";
 var LS_BIDS = "treebidpro_bids_v1";
 
@@ -1467,8 +1467,10 @@ function init() {
       if (b2) { b2.status = el.dataset.status; persistBids(); renderSaved(); }
     } else if (el.dataset.del) {
       if (confirm("Delete this saved bid? This cannot be undone.")) {
+        var delBid = bids.find(function (x) { return x.id === el.dataset.del; });
         bids = bids.filter(function (x) { return x.id !== el.dataset.del; });
         persistBids(); renderSaved(); toast("Bid deleted");
+        if (delBid && typeof window.treebidInboxNoteDelete === "function") window.treebidInboxNoteDelete(delBid);
       }
     }
   });
@@ -1983,13 +1985,27 @@ else __legalMaybePrompt();
 
 <script>
 "use strict";
-/* ================= ADD-BID LINK (v1.2.2) =================
-   A link of the form  <app-url>#addbid=<payload>  offers ONE ready-made bid
-   to the person opening the app. <payload> is base64url-encoded UTF-8 JSON of
-   a single bid object (the same shape as a stored bid). Nothing is added
-   without an explicit tap on "Add this bid"; an invalid payload is ignored
-   silently and the app behaves exactly as before. The fragment is stripped
-   as soon as it has been read, so a refresh never re-prompts. */
+/* ================= ADD-BID LINKS + AUTO-INBOX (v1.3.0) =================
+   Two link forms offer ONE ready-made bid to the person opening the app:
+     <app-url>#addbid=<payload>   <payload> is base64url-encoded UTF-8 JSON
+                                  of a single bid object (the shape of a
+                                  stored bid).
+     <app-url>#bidfile=<name>     The bid JSON is fetched from
+                                  bids/<name>.json, resolved relative to the
+                                  app page. <name> may contain only lowercase
+                                  letters, digits and dashes.
+   Link bids are added only after an explicit tap on "Add this bid"; an
+   invalid payload or name is ignored silently and the app behaves exactly
+   as before. Only a bid file that cannot be loaded says anything (one
+   toast: "Couldn't load that bid link"). The fragment is stripped as soon
+   as it has been read, so a refresh never re-prompts.
+   AUTO-INBOX: bids/inbox.json ({"bids":[ ... ]}) is fetched on init and
+   whenever the app becomes visible again. Any inbox bid whose stable id
+   is not already saved, not tombstoned, and not a duplicate of a saved
+   bid (same customer + total + date) is appended automatically — no tap,
+   no card; a toast is the only feedback. Deleting a bid tombstones the
+   matching inbox id (see the saved-list delete hook) so it stays deleted.
+   Any inbox fetch/parse failure is completely silent. */
 (function () {
   function addBidB64UrlDecode(str) {
     var s = String(str).replace(/-/g, "+").replace(/_/g, "/");
@@ -2002,27 +2018,21 @@ else __legalMaybePrompt();
   function addBidStripFragment() {
     try { history.replaceState(null, document.title, location.pathname + location.search); } catch (e) {}
   }
-  /* Runs on first load and again on any later hashchange, so a second
-     add-bid link tapped while the app is already open also works. */
-  function handleAddBidLink() {
-    var m = /#addbid=([A-Za-z0-9\-_]+)/.exec(location.hash || "");
-    if (!m) return;
-    var parsed = null;
-    try { parsed = JSON.parse(addBidB64UrlDecode(m[1])); } catch (e) { parsed = null; }
+  /* Shared tail of both link flows: validate -> normalize -> offer card.
+     A bid that fails validation is ignored silently. */
+  function offerAddBid(parsed) {
     if (!parsed || typeof parsed !== "object" || typeof parsed.customer !== "string" || !parsed.customer.trim() || !Array.isArray(parsed.trees)) {
-      addBidStripFragment();
       return;
     }
     var bid = normalizeBid(JSON.parse(JSON.stringify(parsed)));
     if (!bid || typeof bid.customer !== "string" || !Array.isArray(bid.trees)) {
-      addBidStripFragment();
       return;
     }
     var card = document.getElementById("addBidCard");
     var summary = document.getElementById("addBidSummary");
     var acceptBtn = document.getElementById("addBidAcceptBtn");
     var dismissBtn = document.getElementById("addBidDismissBtn");
-    if (!card || !summary || !acceptBtn || !dismissBtn) { addBidStripFragment(); return; }
+    if (!card || !summary || !acceptBtn || !dismissBtn) return;
     var total = NaN;
     if (bid.snapshot && typeof bid.snapshot === "object") total = parseFloat(bid.snapshot.totalWithTax);
     if (!isFinite(total)) total = parseFloat(bid.total);
@@ -2032,7 +2042,6 @@ else __legalMaybePrompt();
       "<br>Bid total: <strong>" + money(total) + "</strong>" +
       (bid.date ? "<br>Bid date: " + esc(bid.date) : "");
     card.style.display = "block";
-    addBidStripFragment();
     acceptBtn.onclick = function () {
       var copy = JSON.parse(JSON.stringify(bid));
       copy.id = uid();
@@ -2051,8 +2060,151 @@ else __legalMaybePrompt();
       card.style.display = "none";
     };
   }
+  /* #bidfile=<name>: returns true when the fragment was a bidfile link
+     (handled, whether the name was usable or not). */
+  function handleBidFileLink() {
+    var m = /#bidfile=([A-Za-z0-9\-_%]+)$/.exec(location.hash || "");
+    if (!m) return false;
+    addBidStripFragment();
+    var name = null;
+    try { name = decodeURIComponent(m[1]); } catch (e) { name = null; }
+    if (name === null || !/^[a-z0-9-]+$/.test(name)) return true;
+    fetch("bids/" + name + ".json", { cache: "no-store" })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("bid file not found");
+        return resp.json();
+      })
+      .then(function (parsed) { offerAddBid(parsed); })
+      .catch(function () { toast("Couldn't load that bid link"); });
+    return true;
+  }
+  /* Runs on first load and again on any later hashchange, so a second
+     bid link tapped while the app is already open also works. */
+  function handleAddBidLink() {
+    if (handleBidFileLink()) return;
+    var m = /#addbid=([A-Za-z0-9\-_]+)/.exec(location.hash || "");
+    if (!m) return;
+    var parsed = null;
+    try { parsed = JSON.parse(addBidB64UrlDecode(m[1])); } catch (e) { parsed = null; }
+    addBidStripFragment();
+    offerAddBid(parsed);
+  }
+  /* ================= AUTO BID INBOX =================
+     Zero-tap delivery: bids/inbox.json is checked on init and whenever the
+     app becomes visible again. New bids land in the saved list on their
+     own; the only feedback is a toast. Deletions are remembered in a
+     tombstone list so a deleted inbox bid never comes back. */
+  var LS_INBOX_TOMBSTONES = "treebidpro_inbox_tombstones_v1";
+  var LS_INBOX_IMPORTED = "treebidpro_inbox_imported_v1";
+  var inboxCache = null;       /* bids array from the last successful inbox fetch */
+  var inboxRunning = false;
+  var inboxPendingDeletes = []; /* deletions that happened before any inbox fetch */
+
+  function inboxReadIds(key) {
+    try { var v = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(v) ? v.filter(function (x) { return typeof x === "string"; }) : []; } catch (e) { return []; }
+  }
+  function inboxWriteIds(key, arr) {
+    try { localStorage.setItem(key, JSON.stringify(arr)); } catch (e) {}
+  }
+  function inboxTotalOf(b) {
+    if (b && b.snapshot && typeof b.snapshot === "object") {
+      var t = parseFloat(b.snapshot.totalWithTax);
+      if (isFinite(t)) return t;
+    }
+    var t2 = parseFloat(b && b.total);
+    return isFinite(t2) ? t2 : NaN;
+  }
+  /* Identity used for dedupe: same customer, same total, same date. */
+  function inboxSameBid(a, b) {
+    if (!a || !b || typeof a.customer !== "string" || typeof b.customer !== "string") return false;
+    var ta = inboxTotalOf(a), tb = inboxTotalOf(b);
+    if (!isFinite(ta) || ta !== tb) return false;
+    return a.customer === b.customer && String(a.date || "") === String(b.date || "");
+  }
+  function inboxBuilderIsFresh() {
+    if (!current) return true;
+    if (current.id) return current.customer === "Example — Johnson Residence"; /* untouched first-run example */
+    return !(current.customer || current.phone || current.address || current.notes || current.internalNotes) &&
+      !(current.trees || []).some(function (t) { return !!t.species; });
+  }
+  function inboxTombstoneFor(deleted) {
+    if (!deleted) return false;
+    var tombs = inboxReadIds(LS_INBOX_TOMBSTONES);
+    var imported = inboxReadIds(LS_INBOX_IMPORTED);
+    var changed = false;
+    function tomb(id) { if (id && tombs.indexOf(id) < 0) { tombs.push(id); changed = true; } }
+    if (imported.indexOf(deleted.id) >= 0) tomb(deleted.id);
+    if (inboxCache) {
+      inboxCache.forEach(function (ib) {
+        if (!ib || typeof ib.id !== "string") return;
+        if (ib.id === deleted.id || inboxSameBid(ib, deleted)) tomb(ib.id);
+      });
+    }
+    if (changed) inboxWriteIds(LS_INBOX_TOMBSTONES, tombs);
+    return changed;
+  }
+  /* Called by the saved-list delete handler (main script) after any bid
+     deletion, so an inbox bid the user deletes is never re-imported. */
+  window.treebidInboxNoteDelete = function (deleted) {
+    if (!deleted) return;
+    var known = inboxTombstoneFor(deleted);
+    if (!known && !inboxCache) { inboxPendingDeletes.push(deleted); importInbox(); }
+  };
+  function importInbox() {
+    if (inboxRunning) return;
+    inboxRunning = true;
+    fetch("bids/inbox.json", { cache: "no-store" })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("no inbox");
+        return resp.json();
+      })
+      .then(function (data) {
+        inboxRunning = false;
+        if (!data || !Array.isArray(data.bids)) return;
+        inboxCache = data.bids;
+        if (inboxPendingDeletes.length) {
+          var pending = inboxPendingDeletes; inboxPendingDeletes = [];
+          pending.forEach(inboxTombstoneFor);
+        }
+        var tombs = inboxReadIds(LS_INBOX_TOMBSTONES);
+        var imported = inboxReadIds(LS_INBOX_IMPORTED);
+        var importedChanged = false;
+        var added = [];
+        data.bids.forEach(function (raw) {
+          if (!raw || typeof raw !== "object" || typeof raw.id !== "string" || !raw.id) return;
+          if (tombs.indexOf(raw.id) >= 0) return;
+          if (bids.some(function (x) { return x.id === raw.id; })) {
+            if (imported.indexOf(raw.id) < 0) { imported.push(raw.id); importedChanged = true; }
+            return;
+          }
+          var bid = normalizeBid(JSON.parse(JSON.stringify(raw)));
+          if (!bid || typeof bid.customer !== "string" || !Array.isArray(bid.trees)) return;
+          if (bids.some(function (x) { return inboxSameBid(x, bid); })) return;
+          bids.push(bid);
+          if (imported.indexOf(bid.id) < 0) { imported.push(bid.id); importedChanged = true; }
+          added.push(bid);
+        });
+        if (importedChanged) inboxWriteIds(LS_INBOX_IMPORTED, imported);
+        if (!added.length) return;
+        persistBids();
+        renderSaved();
+        if (added.length === 1) toast("New bid added: " + added[0].customer);
+        else toast(added.length + " new bids added");
+        if (inboxBuilderIsFresh()) {
+          current = JSON.parse(JSON.stringify(added[added.length - 1]));
+          fillBidForm();
+          currentFromSaved = true;
+          renderSaved();
+        }
+      })
+      .catch(function () { inboxRunning = false; /* completely silent: offline, 404, bad JSON */ });
+  }
+
   window.addEventListener("hashchange", handleAddBidLink);
   handleAddBidLink();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", importInbox);
+  else importInbox();
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) importInbox(); });
 })();
 </script>
 
