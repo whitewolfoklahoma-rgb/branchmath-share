@@ -56,6 +56,43 @@
   .tree-thumb-wrap{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
   .tree-thumb{width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
   .tree-thumb-btns{display:flex;gap:4px;flex-wrap:wrap}
+  .marked-badge{display:inline-block;background:#b34700;color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.3px}
+  /* ---------- Photo mark editor (v1.6.0) ---------- */
+  #markOverlay{position:fixed;inset:0;z-index:9000;background:#101613;display:none;flex-direction:column}
+  #markOverlay.open{display:flex}
+  #markOverlay .mk-head{display:flex;align-items:center;gap:8px;padding:10px 12px;color:#fff}
+  #markOverlay .mk-title{font-weight:800;font-size:16px;margin-right:auto}
+  #markStage{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:6px}
+  #markCanvas{max-width:100%;height:auto;border-radius:6px;touch-action:none;background:#000}
+  #markOverlay .mk-tools{display:flex;flex-wrap:wrap;gap:8px;padding:8px 12px}
+  #markOverlay .mk-tools .btn{min-height:48px}
+  #markOverlay .mk-tool[aria-pressed="true"]{background:var(--accent);color:#1d2b2e;border-color:var(--accent)}
+  #markOverlay .mk-labels{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 12px 6px}
+  #markOverlay .mk-chip{min-height:48px;padding:10px 14px;border-radius:999px;border:1.5px solid #8a978e;background:transparent;color:#fff;font-weight:700;font-size:13.5px;cursor:pointer}
+  #markOverlay .mk-chip[aria-pressed="true"]{background:#fff;color:#101613;border-color:#fff}
+  #markLabelInput{flex:1;min-width:130px}
+  #markOverlay .mk-foot{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#101613}
+  #markOverlay .mk-foot .btn{flex:1;min-height:52px}
+  /* ---------- Contract signing (v1.7.0) ---------- */
+  #contractOverlay{position:fixed;inset:0;z-index:9100;background:#101613;display:none;flex-direction:column}
+  #contractOverlay.open{display:flex}
+  #contractOverlay .mk-head{display:flex;align-items:center;gap:8px;padding:10px 12px;color:#fff}
+  #contractOverlay .mk-title{font-weight:800;font-size:16px;margin-right:auto}
+  #contractOverlay .mk-foot{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#101613}
+  #contractOverlay .mk-foot .btn{flex:1;min-height:52px}
+  #contractBody{flex:1;overflow:auto;padding:12px}
+  .contract-text{background:#fdfdf8;color:#1c2420;border-radius:12px;padding:16px;font-size:14.5px;line-height:1.55}
+  .contract-text .ct-title{font-size:19px;font-weight:800;margin-bottom:8px}
+  .contract-text ul{margin:6px 0 10px 18px;padding:0}
+  .contract-text .ct-terms p{margin:6px 0}
+  #signArea,#viewArea{margin-top:12px;background:#1a241e;border-radius:12px;padding:12px}
+  #viewArea{color:#e8f0ea}
+  #signArea label.f,#viewArea label.f{color:#cfe0d4}
+  #signPad,#counterPad{width:100%;height:150px;background:#fff;border:2px solid #9db4a4;border-radius:10px;touch-action:none;display:block}
+  #signName,#signDate,#counterName{width:100%;min-height:48px;font-size:16px;border-radius:10px;border:1px solid #44564a;padding:8px 10px;margin-bottom:10px;background:#fff;color:#14231b;box-sizing:border-box}
+  .sig-img{max-width:100%;height:90px;background:#fff;border:1px solid #d8ded9;border-radius:8px}
+  .qcontract{margin-top:14px;border:1.5px solid #2e5d43;border-radius:10px;padding:10px 12px;font-size:13.5px}
+  .qsig{height:54px;max-width:80%;background:#fff;border:1px solid #d8ded9;border-radius:6px;margin-top:6px}
   label.photo-add{display:inline-flex;align-items:center;cursor:pointer}
   details.tree-more{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
   details.tree-more summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--green);padding:6px 0}
@@ -203,7 +240,7 @@
     <div class="btnrow">
       <button class="btn secondary" id="addTreeBtn" type="button">+ Add a Tree</button>
     </div>
-    <p class="hint">Crew time auto-fills from height, diameter and work type — adjust it to match how your crew actually works. Hazard and access multipliers adjust that tree's labor &amp; equipment cost. Add a photo on each tree right here — it saves with the bid and prints on the customer quote beside that tree.</p>
+    <p class="hint">Crew time auto-fills from height, diameter and work type — adjust it to match how your crew actually works. Hazard and access multipliers adjust that tree's labor &amp; equipment cost. Add a photo on each tree right here — it saves with the bid and prints on the customer quote beside that tree. Circle the tree in the photo with <em>Mark the tree</em> so the bid shows exactly which tree (or which part of it) the work is for.</p>
   </div>
 
   <div class="card">
@@ -295,6 +332,14 @@
     <button class="btn ghost" id="backToBuilderBtn" type="button">Back to Bid Builder</button>
   </div>
   <div id="quotePreview"></div>
+  <div class="card" id="contractPanel" style="margin-top:14px">
+    <h2>Work Contract</h2>
+    <p class="hint" id="contractStatus">Contract: not signed yet.</p>
+    <div class="btnrow">
+      <button class="btn" id="contractSignBtn" type="button">✍️ Get customer signature</button>
+      <button class="btn secondary" id="contractViewBtn" type="button" style="display:none">View signed contract</button>
+    </div>
+  </div>
   <div class="card" style="margin-top:14px">
     <h2>Send This Quote</h2>
     <p class="hint">The easy way: save the clean one-page quote sheet as a PDF, then attach it wherever you talk to the customer.</p>
@@ -402,10 +447,11 @@
       <li><strong>Trust the three numbers.</strong> <em>Break-even</em> is what the job costs you, all-in. Never bid below it. <em>Recommended</em> adds your target profit margin — that's your normal bid. <em>Premium</em> (+15%) is for rush work or when you're booked out and the job has to be worth displacing another.</li>
       <li><strong>Save every bid.</strong> Saved bids live on the Saved Bids tab. Mark them Won or Lost as you hear back — over a season, your win rate at your recommended price tells you whether your margin is right.</li>
       <li><strong>Send the quote.</strong> The Customer Quote tab turns the current bid into a clean sheet with your company info, per-tree line items, the total, and your terms. Print it or save it as a PDF and hand/send it to the customer.</li>
+      <li><strong>Sign the contract.</strong> On the Customer Quote tab, the Work Contract panel builds a simple agreement from the bid — customer, scope (including what your marked photos show), and the agreed price. Tap “Get customer signature” and the customer signs with a finger right on your phone. The signed contract saves with the bid, shows on the quote, and can be re-opened any time from the same panel.</li>
       <li><strong>Send it in one tap.</strong> Add the customer's phone and email in the Bid Builder, then use Send on a saved bid (or the Send card on the Customer Quote tab): Email, Text, and WhatsApp open in your own apps with the itemized quote already written; Copy quote text pastes anywhere. Saved bids always send at their frozen snapshot prices.</li>
       <li><strong>Invoice with Wave.</strong> The Wave card on the Customer Quote tab shows the quote as invoice lines (item, qty, price). Copy them, open Wave, and paste them into a new invoice — an open-and-paste handoff, not a live sync: this file works offline and never connects to your Wave account. Track the result back in the Bid Builder's Payment Tracking card (status, method, deposit).</li>
       <li><strong>Your rate card.</strong> Business Settings holds your preset services &amp; items with your own prices (plus any custom items you add). New bids pick them up from the Preset Services &amp; Items card; override a price on a single bid without changing the preset. Changing a preset never reprices a bid you already saved.</li>
-      <li><strong>A photo for each tree.</strong> On each tree entry, tap <em>Add a photo</em> to take or pick a photo of that tree — add as many as you need, remove or replace one with a tap. Photos are shrunk on your device, saved with the bid, and printed on the customer quote beside that tree's line so you (and the customer) know exactly which tree is which. Filling in <em>Where on the property</em>, stump and wood choices, the landing / drop zone, and a one-line note (under <em>More details</em>) makes the quote clearer still.</li>
+      <li><strong>A photo for each tree — and circle the tree in it.</strong> On each tree entry, tap <em>Add a photo</em> to take or pick a photo of that tree — add as many as you need, remove or replace one with a tap. Then tap <em>Mark the tree</em> on the photo and drag a circle around the tree the work is for — or draw around just the branches or just the top when only part of the tree is being done, and label the mark (<em>Whole tree</em>, <em>Branches only</em>, <em>Top only</em>, or your own words). The marked photo is what saves with the bid and prints on the customer quote beside that tree's line, so you (and the customer) know exactly which tree — and which part of it — is which. Your original photo is kept untouched underneath; edit or clear the marks any time. Filling in <em>Where on the property</em>, stump and wood choices, the landing / drop zone, and a one-line note (under <em>More details</em>) makes the quote clearer still.</li>
       <li><strong>Two figures, kept separate.</strong> Each tree shows <em>This tree by itself</em> — just that tree's labor and equipment at your rates with its difficulty multipliers, no disposal, travel, extras, or overhead. The <em>Whole job, everything in</em> figures in the Pricing Breakdown are the full job the way BranchMath has always figured it: every tree plus disposal, travel, extras, overhead, and your margin (break-even / recommended / premium).</li>
       <li><strong>Close out every finished job.</strong> Open the saved bid, scroll to <em>Job Closeout — Bid vs. Actual</em>, and enter the actual crew time, your actual other costs (disposal, equipment, fuel, rentals), and the amount you collected. BranchMath figures your actual margin and shows how the real hours and costs landed against the bid — and the Saved Bids summary rolls every closed-out job into one real-margin figure, so you can see what your bids actually finished at.</li>
     </ol>
@@ -421,8 +467,8 @@
     </div>
     <p class="hint">TreeFinder: list your tree service free, see local homeowner job requests, and pay nothing unless a job books and pays. BookedSolid: put the won job on your schedule — appointment buffers, a waitlist, deposit and no-show tracking, and a printable day sheet.</p>
     <p class="hint">Estimates only: BranchMath helps you price consistently, but site conditions, your judgment, and your local market make the final call. Always verify a bid before you send it.</p>
-    <p><strong>BranchMath v1.5.0</strong></p>
-    <p>Questions or trouble? <a class="btn" id="helpEmailBtn" href="mailto:whitewolfbackoffice@gmail.com?subject=BranchMath%20help%20%E2%80%94%20v1.5.0&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A">Email us</a></p>
+    <p><strong>BranchMath v1.7.0</strong></p>
+    <p>Questions or trouble? <a class="btn" id="helpEmailBtn" href="mailto:whitewolfbackoffice@gmail.com?subject=BranchMath%20help%20%E2%80%94%20v1.7.0&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A">Email us</a></p>
     <p class="hint">Photo analysis by AI is planned for a future connected edition of BranchMath — it is not available in this offline version, and nothing in this version analyzes your photos.</p>
   </div>
 </section>
@@ -432,10 +478,78 @@
 <div id="quotePrint"></div>
 <div class="toast" id="toast"></div>
 
+<!-- ================= PHOTO MARK EDITOR (v1.6.0) ================= -->
+<div id="markOverlay" role="dialog" aria-label="Mark the tree in this photo">
+  <div class="mk-head">
+    <span class="mk-title" id="markTitle">Mark the tree</span>
+    <button type="button" class="btn ghost" id="markCancelBtn">Cancel</button>
+  </div>
+  <div id="markStage"><canvas id="markCanvas"></canvas></div>
+  <div class="mk-tools">
+    <button type="button" class="btn secondary mk-tool" data-mtool="ellipse" aria-pressed="true">⭕ Circle</button>
+    <button type="button" class="btn secondary mk-tool" data-mtool="path" aria-pressed="false">✏️ Draw around it</button>
+    <button type="button" class="btn secondary mk-tool" data-mtool="arrow" aria-pressed="false">➡️ Arrow</button>
+    <button type="button" class="btn ghost" id="markUndoBtn">↩ Undo</button>
+    <button type="button" class="btn ghost" id="markClearBtn">Clear all</button>
+  </div>
+  <div class="mk-labels">
+    <span style="color:#cfe0d4;font-size:13px;font-weight:700">Label the next mark:</span>
+    <button type="button" class="mk-chip" data-mlabel="Whole tree" aria-pressed="false">Whole tree</button>
+    <button type="button" class="mk-chip" data-mlabel="Branches only" aria-pressed="false">Branches only</button>
+    <button type="button" class="mk-chip" data-mlabel="Top only" aria-pressed="false">Top only</button>
+    <input type="text" id="markLabelInput" maxlength="40" placeholder="…or type your own label">
+  </div>
+  <div class="mk-foot">
+    <button type="button" class="btn" id="markDoneBtn">✓ Done — save marks</button>
+  </div>
+</div>
+
+<!-- ================= WORK CONTRACT + SIGNATURE (v1.7.0) ================= -->
+<div id="contractOverlay" role="dialog" aria-label="Work contract and signature">
+  <div class="mk-head">
+    <span class="mk-title">Work Contract</span>
+    <button type="button" class="btn ghost" id="contractCancelBtn">Cancel</button>
+  </div>
+  <div id="contractBody">
+    <div id="contractText" class="contract-text"></div>
+    <div id="signArea">
+      <label class="f" for="signName">Customer printed name</label>
+      <input type="text" id="signName" maxlength="60" autocomplete="off">
+      <label class="f" for="signDate">Date</label>
+      <input type="date" id="signDate">
+      <label class="f">Customer signature — sign with a finger in the box</label>
+      <canvas id="signPad"></canvas>
+      <div class="btnrow" style="margin-top:8px">
+        <button type="button" class="btn ghost" id="signClearBtn">Clear signature</button>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;color:#e8f0ea;font-size:14.5px;padding:10px 0">
+        <input type="checkbox" id="counterToggle" style="width:22px;height:22px"> Contractor also signs (optional)
+      </label>
+      <div id="counterArea" style="display:none">
+        <label class="f" for="counterName">Contractor printed name</label>
+        <input type="text" id="counterName" maxlength="60" autocomplete="off">
+        <label class="f">Contractor signature</label>
+        <canvas id="counterPad"></canvas>
+        <div class="btnrow" style="margin-top:8px">
+          <button type="button" class="btn ghost" id="counterClearBtn">Clear contractor signature</button>
+        </div>
+      </div>
+    </div>
+    <div id="viewArea" style="display:none">
+      <div id="contractViewMeta"></div>
+      <p style="margin:10px 0 4px;font-weight:700">Customer signature</p>
+      <img id="contractViewSig" class="sig-img" alt="Customer signature">
+    </div>
+  </div>
+  <div class="mk-foot">
+    <button type="button" class="btn" id="contractSaveBtn">✓ Sign &amp; save contract</button>
+  </div>
+</div>
+
 <script>
 "use strict";
 /* ============================== DATA ============================== */
-var APP_VERSION = "1.5.0";
+var APP_VERSION = "1.7.0";
 var LS_SETTINGS = "treebidpro_settings_v1";
 var LS_BIDS = "treebidpro_bids_v1";
 
@@ -505,7 +619,57 @@ function blankTree() {
   return { species: "", height: 40, diameter: 18, work: "removal",
            hazards: { dead: false, leaning: false, structure: false, power: false },
            access: "standard", hours: 3,
-           location: "", stump: "none", wood: "", note: "", landing: "none", photos: [] };
+           location: "", stump: "none", wood: "", note: "", landing: "none", photos: [], photoMarks: [] };
+}
+/* ---------- Photo marks (v1.6.0) ----------
+   tree.photoMarks[j] pairs with tree.photos[j]: null, or
+   { marked: <flattened JPEG data URL with the marks drawn in>,
+     shapes: [ {t:"ellipse"|"path"|"arrow", ...coords normalized 0..1, label} ] }.
+   The original photo in photos[j] is never modified. */
+function markNum(v) { var n = parseFloat(v); if (!isFinite(n)) return 0; return Math.min(1, Math.max(0, n)); }
+function sanitizeMarkShape(s) {
+  if (!s || typeof s !== "object") return null;
+  var label = typeof s.label === "string" ? s.label.slice(0, 40) : "";
+  if (s.t === "ellipse") return { t: "ellipse", x: markNum(s.x), y: markNum(s.y), rx: markNum(s.rx), ry: markNum(s.ry), label: label };
+  if (s.t === "arrow") return { t: "arrow", x1: markNum(s.x1), y1: markNum(s.y1), x2: markNum(s.x2), y2: markNum(s.y2), label: label };
+  if (s.t === "path") {
+    if (!Array.isArray(s.pts) || s.pts.length < 2) return null;
+    var pts = s.pts.slice(0, 400).map(function (p) { return Array.isArray(p) ? [markNum(p[0]), markNum(p[1])] : null; }).filter(function (p) { return p !== null; });
+    if (pts.length < 2) return null;
+    return { t: "path", pts: pts, label: label };
+  }
+  return null;
+}
+function sanitizePhotoMark(m) {
+  if (!m || typeof m !== "object") return null;
+  if (typeof m.marked !== "string" || m.marked.indexOf("data:image/") !== 0) return null;
+  var shapes = [];
+  if (Array.isArray(m.shapes)) m.shapes.slice(0, 60).forEach(function (s) { var sh = sanitizeMarkShape(s); if (sh) shapes.push(sh); });
+  if (!shapes.length) return null;
+  return { marked: m.marked, shapes: shapes };
+}
+function photoDisplaySrc(t, j) {
+  if (t && Array.isArray(t.photoMarks) && t.photoMarks[j] && typeof t.photoMarks[j].marked === "string") return t.photoMarks[j].marked;
+  return (t && Array.isArray(t.photos) && t.photos[j]) || "";
+}
+/* Contract sanitizer (v1.7.0) — defined HERE, beside the other sanitizers,
+   because normalizeBid runs at first load (var bids = loadBids()) before
+   the contract UI section's script block evaluates. */
+function sanitizeContract(c) {
+  if (!c || typeof c !== "object") return null;
+  if (typeof c.signature !== "string" || c.signature.indexOf("data:image/") !== 0 || c.signature.length > 400000) return null;
+  if (typeof c.signerName !== "string" || !c.signerName.trim()) return null;
+  return {
+    signerName: c.signerName.slice(0, 60),
+    signDate: typeof c.signDate === "string" ? c.signDate.slice(0, 10) : "",
+    signedAt: typeof c.signedAt === "string" ? c.signedAt.slice(0, 40) : "",
+    signature: c.signature,
+    counterName: typeof c.counterName === "string" ? c.counterName.slice(0, 60) : "",
+    counterSignature: (typeof c.counterSignature === "string" && c.counterSignature.indexOf("data:image/") === 0 && c.counterSignature.length <= 400000) ? c.counterSignature : "",
+    price: Math.max(0, num(c.price)),
+    company: typeof c.company === "string" ? c.company.slice(0, 80) : "",
+    scope: Array.isArray(c.scope) ? c.scope.filter(function (x) { return typeof x === "string"; }).slice(0, 40).map(function (x) { return x.slice(0, 300); }) : []
+  };
 }
 function suggestedHours(t) {
   var h = parseFloat(t.height) || 0, d = parseFloat(t.diameter) || 0, raw;
@@ -577,12 +741,16 @@ function normalizeBid(b) {
     if (LANDING_VALUES.indexOf(t.landing) < 0) t.landing = "none";
     if (!Array.isArray(t.photos)) t.photos = [];
     t.photos = t.photos.filter(function (ph) { return typeof ph === "string" && ph.indexOf("data:image/") === 0; });
+    if (!Array.isArray(t.photoMarks)) t.photoMarks = [];
+    var rawMarks = t.photoMarks;
+    t.photoMarks = t.photos.map(function (ph, j) { return sanitizePhotoMark(rawMarks[j]); });
     return t;
   });
   if (["open", "won", "lost"].indexOf(b.status) < 0) b.status = "open";
   if (typeof b.notes !== "string") b.notes = b.notes == null ? "" : String(b.notes);
   if (typeof b.internalNotes !== "string") b.internalNotes = b.internalNotes == null ? "" : String(b.internalNotes);
   if (b.snapshot !== undefined && (!b.snapshot || typeof b.snapshot !== "object" || !Array.isArray(b.snapshot.lines))) delete b.snapshot;
+  b.contract = sanitizeContract(b.contract);
   if (typeof b.email !== "string") b.email = b.email == null ? "" : String(b.email);
   if (!Array.isArray(b.items)) b.items = [];
   b.items = b.items.filter(function (it) { return it && typeof it === "object"; }).map(function (it) {
@@ -625,7 +793,7 @@ function exampleBid() {
 function blankBid() {
   return { id: null, customer: "", phone: "", email: "", address: "", date: todayStr(), crewSize: 3,
            disposal: "haul", travelMiles: 0, extras: 0, notes: "", internalNotes: "", terms: DEFAULT_TERMS,
-           status: "open", items: [], payStatus: "unpaid", payMethod: "", depositAmt: 0, closeout: null, trees: [blankTree()] };
+           status: "open", items: [], payStatus: "unpaid", payMethod: "", depositAmt: 0, closeout: null, contract: null, trees: [blankTree()] };
 }
 
 /* ============================== PRICING ENGINE ============================== */
@@ -684,8 +852,9 @@ function quoteLines(bid, s, calc) {
     detail.push("landing zone: " + landingLabel(t.landing));
     if (t.note) detail.push("note: " + t.note);
     var photos = (Array.isArray(t.photos) ? t.photos.filter(function (ph) { return typeof ph === "string"; }) : []);
+    var dispPhotos = photos.map(function (ph, j) { return photoDisplaySrc(t, j); });
     lines.push({ desc: desc, detail: detail.join(" · "), amount: tl.cost * scale,
-                 photo: photos.length ? photos[0] : "", photos: photos });
+                 photo: dispPhotos.length ? dispPhotos[0] : "", photos: dispPhotos });
   });
   if (calc.disposal > 0) lines.push({ desc: "Disposal — " + DISPOSAL_LABELS[bid.disposal], detail: "", amount: calc.disposal * scale });
   if (calc.travel > 0) lines.push({ desc: "Travel (" + num(bid.travelMiles) + " mi)", detail: "", amount: calc.travel * scale });
@@ -814,8 +983,9 @@ function handlePhotoFiles(treeIdx, files, replaceIdx) {
       if (dataUrl && t) {
         anyOk = true;
         if (!Array.isArray(t.photos)) t.photos = [];
-        if (replaceIdx != null && k === 0) t.photos[replaceIdx] = dataUrl;
-        else t.photos.push(dataUrl);
+        if (!Array.isArray(t.photoMarks)) t.photoMarks = [];
+        if (replaceIdx != null && k === 0) { t.photos[replaceIdx] = dataUrl; t.photoMarks[replaceIdx] = null; }
+        else { t.photos.push(dataUrl); t.photoMarks.push(null); }
       }
       if (--pending === 0) {
         if (anyOk) { bidDirty = true; priceDirty = true; renderTrees(); refreshPricing(); toast("Photo saved on this device"); }
@@ -893,6 +1063,357 @@ function fillBidForm() {
   renderTrees(); renderItems(); refreshPresetPick(); refreshPricing(); refreshCloseout();
 }
 
+/* ================= PHOTO MARK EDITOR (v1.6.0) =================
+   Circle a whole tree, lasso just the branches or the top, or point an
+   arrow at one limb — the marked photo is what saves with the bid and
+   prints on the quote. Shapes are kept as normalized coordinates on
+   tree.photoMarks[j].shapes (so marks can be edited later) alongside a
+   flattened JPEG in .marked; the original photo is never modified. */
+var markSession = null;
+function openMarkEditor(treeIdx, photoIdx) {
+  var t = current && current.trees[treeIdx];
+  if (!t || !Array.isArray(t.photos) || !t.photos[photoIdx]) { toast("That photo is gone — add it again"); return; }
+  var img = new Image();
+  img.onload = function () {
+    var existing = (Array.isArray(t.photoMarks) && t.photoMarks[photoIdx]) ? t.photoMarks[photoIdx] : null;
+    markSession = { treeIdx: treeIdx, photoIdx: photoIdx, img: img,
+      shapes: existing && Array.isArray(existing.shapes) ? JSON.parse(JSON.stringify(existing.shapes)) : [],
+      tool: "ellipse", label: "", cur: null, start: null };
+    $("markTitle").textContent = "Mark the tree — Tree " + (treeIdx + 1) + ", photo " + (photoIdx + 1);
+    var cv = $("markCanvas");
+    cv.width = img.naturalWidth || img.width; cv.height = img.naturalHeight || img.height;
+    setMarkLabel("");
+    setMarkTool("ellipse");
+    $("markOverlay").classList.add("open");
+    drawMarkCanvas();
+  };
+  img.onerror = function () { toast("That photo could not be opened — try another one"); };
+  img.src = t.photos[photoIdx];
+}
+function closeMarkEditor() { markSession = null; $("markOverlay").classList.remove("open"); }
+function setMarkTool(tool) {
+  if (markSession) markSession.tool = tool;
+  document.querySelectorAll("#markOverlay .mk-tool").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.mtool === tool ? "true" : "false"); });
+}
+function setMarkLabel(label) {
+  if (markSession) markSession.label = label;
+  document.querySelectorAll("#markOverlay .mk-chip").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.mlabel === label ? "true" : "false"); });
+  var inp = $("markLabelInput");
+  if (inp && inp.value !== label) inp.value = label;
+}
+function markShapeBBox(s) {
+  if (s.t === "ellipse") return { x0: s.x - s.rx, y0: s.y - s.ry, x1: s.x + s.rx, y1: s.y + s.ry };
+  if (s.t === "arrow") return { x0: Math.min(s.x1, s.x2), y0: Math.min(s.y1, s.y2), x1: Math.max(s.x1, s.x2), y1: Math.max(s.y1, s.y2) };
+  var x0 = 1, y0 = 1, x1 = 0, y1 = 0;
+  s.pts.forEach(function (p) { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); });
+  return { x0: x0, y0: y0, x1: x1, y1: y1 };
+}
+function traceMarkPath(ctx, s, W, H) {
+  ctx.beginPath();
+  if (s.t === "ellipse") { ctx.ellipse(s.x * W, s.y * H, Math.max(1.5, s.rx * W), Math.max(1.5, s.ry * H), 0, 0, Math.PI * 2); }
+  else if (s.t === "path") { s.pts.forEach(function (p, k) { if (k === 0) ctx.moveTo(p[0] * W, p[1] * H); else ctx.lineTo(p[0] * W, p[1] * H); }); }
+  else if (s.t === "arrow") {
+    var x1 = s.x1 * W, y1 = s.y1 * H, x2 = s.x2 * W, y2 = s.y2 * H;
+    ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    var ang = Math.atan2(y2 - y1, x2 - x1), hl = Math.max(14, W * 0.035);
+    ctx.moveTo(x2, y2); ctx.lineTo(x2 - hl * Math.cos(ang - 0.45), y2 - hl * Math.sin(ang - 0.45));
+    ctx.moveTo(x2, y2); ctx.lineTo(x2 - hl * Math.cos(ang + 0.45), y2 - hl * Math.sin(ang + 0.45));
+  }
+}
+function drawMarkShape(ctx, s, W, H) {
+  var lw = Math.max(4, Math.round(W * 0.009));
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  traceMarkPath(ctx, s, W, H);
+  ctx.strokeStyle = "rgba(255,255,255,.92)"; ctx.lineWidth = lw + 5; ctx.stroke();
+  traceMarkPath(ctx, s, W, H);
+  ctx.strokeStyle = "#e64a00"; ctx.lineWidth = lw; ctx.stroke();
+  if (s.label) {
+    var bb = markShapeBBox(s);
+    var fs = Math.max(17, Math.round(W * 0.03));
+    ctx.font = "800 " + fs + "px system-ui, -apple-system, sans-serif";
+    var tw = ctx.measureText(s.label).width, pad = fs * 0.45;
+    var lx = Math.min(Math.max(0, bb.x0 * W), Math.max(0, W - tw - pad * 2));
+    var ly = Math.max(0, bb.y0 * H - fs - pad * 1.6 - 4);
+    ctx.fillStyle = "#e64a00";
+    ctx.fillRect(lx, ly, tw + pad * 2, fs + pad * 1.1);
+    ctx.fillStyle = "#ffffff"; ctx.textBaseline = "top";
+    ctx.fillText(s.label, lx + pad, ly + pad * 0.55);
+  }
+}
+function drawMarkCanvas() {
+  if (!markSession) return;
+  var cv = $("markCanvas"), ctx = cv.getContext("2d");
+  ctx.drawImage(markSession.img, 0, 0, cv.width, cv.height);
+  var all = markSession.shapes.slice();
+  if (markSession.cur) all.push(markSession.cur);
+  all.forEach(function (s) { drawMarkShape(ctx, s, cv.width, cv.height); });
+}
+function finishMarkEditor() {
+  if (!markSession) return;
+  var ms = markSession;
+  var t = current && current.trees[ms.treeIdx];
+  if (!t) { closeMarkEditor(); return; }
+  if (!Array.isArray(t.photoMarks)) t.photoMarks = [];
+  if (ms.shapes.length) {
+    drawMarkCanvas();
+    t.photoMarks[ms.photoIdx] = { marked: canvasToTargetJpeg($("markCanvas")), shapes: JSON.parse(JSON.stringify(ms.shapes)) };
+    toast("Marks saved on this photo");
+  } else {
+    t.photoMarks[ms.photoIdx] = null;
+    toast("Marks cleared from this photo");
+  }
+  bidDirty = true; priceDirty = true;
+  closeMarkEditor();
+  renderTrees(); refreshPricing();
+}
+function wireMarkEditor() {
+  var cv = $("markCanvas");
+  function pos(ev) {
+    var r = cv.getBoundingClientRect();
+    return [Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height))];
+  }
+  cv.addEventListener("pointerdown", function (ev) {
+    if (!markSession) return;
+    ev.preventDefault();
+    try { cv.setPointerCapture(ev.pointerId); } catch (e) {}
+    var p = pos(ev);
+    markSession.start = p;
+    if (markSession.tool === "ellipse") markSession.cur = { t: "ellipse", x: p[0], y: p[1], rx: 0, ry: 0, label: markSession.label };
+    else if (markSession.tool === "arrow") markSession.cur = { t: "arrow", x1: p[0], y1: p[1], x2: p[0], y2: p[1], label: markSession.label };
+    else markSession.cur = { t: "path", pts: [p], label: markSession.label };
+    drawMarkCanvas();
+  });
+  cv.addEventListener("pointermove", function (ev) {
+    if (!markSession || !markSession.cur) return;
+    ev.preventDefault();
+    var p = pos(ev), cur = markSession.cur, st = markSession.start;
+    if (cur.t === "ellipse") { cur.x = (st[0] + p[0]) / 2; cur.y = (st[1] + p[1]) / 2; cur.rx = Math.abs(p[0] - st[0]) / 2; cur.ry = Math.abs(p[1] - st[1]) / 2; }
+    else if (cur.t === "arrow") { cur.x2 = p[0]; cur.y2 = p[1]; }
+    else { var last = cur.pts[cur.pts.length - 1]; if (Math.abs(p[0] - last[0]) + Math.abs(p[1] - last[1]) > 0.004) cur.pts.push(p); }
+    drawMarkCanvas();
+  });
+  function endStroke() {
+    if (!markSession || !markSession.cur) return;
+    var cur = markSession.cur;
+    var keep = false;
+    if (cur.t === "ellipse") keep = cur.rx > 0.012 || cur.ry > 0.012;
+    else if (cur.t === "arrow") keep = Math.abs(cur.x2 - cur.x1) + Math.abs(cur.y2 - cur.y1) > 0.03;
+    else keep = cur.pts.length > 2;
+    if (keep) markSession.shapes.push(cur);
+    markSession.cur = null; markSession.start = null;
+    drawMarkCanvas();
+  }
+  cv.addEventListener("pointerup", endStroke);
+  cv.addEventListener("pointercancel", endStroke);
+  document.querySelectorAll("#markOverlay .mk-tool").forEach(function (b) {
+    b.addEventListener("click", function () { setMarkTool(b.dataset.mtool); });
+  });
+  document.querySelectorAll("#markOverlay .mk-chip").forEach(function (b) {
+    b.addEventListener("click", function () { setMarkLabel(b.getAttribute("aria-pressed") === "true" ? "" : b.dataset.mlabel); });
+  });
+  $("markLabelInput").addEventListener("input", function () {
+    if (!markSession) return;
+    markSession.label = this.value.slice(0, 40);
+    document.querySelectorAll("#markOverlay .mk-chip").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.mlabel === markSession.label ? "true" : "false"); });
+  });
+  $("markUndoBtn").addEventListener("click", function () { if (markSession) { markSession.shapes.pop(); drawMarkCanvas(); } });
+  $("markClearBtn").addEventListener("click", function () { if (markSession) { markSession.shapes = []; drawMarkCanvas(); } });
+  $("markCancelBtn").addEventListener("click", function () { closeMarkEditor(); });
+  $("markDoneBtn").addEventListener("click", function () { finishMarkEditor(); });
+}
+
+/* ================= WORK CONTRACT + SIGNATURE (v1.7.0) =================
+   One contract lives ON the bid record (like the closeout): the scope
+   lines and agreed price are frozen at signing time, and the signature
+   is a PNG data URL drawn on a finger pad. A bid with no contract (or a
+   contract that fails sanitizing) is simply "not signed yet".
+   NOTE: sanitizeContract itself lives beside sanitizePhotoMark above —
+   normalizeBid calls it during the first loadBids(), before this
+   section's script block has evaluated. */
+function contractScopeLines(bid, s) {
+  var calc = calcBid(bid, s);
+  var out = [];
+  bid.trees.forEach(function (t, i) {
+    var parts = [];
+    if (num(t.height)) parts.push(num(t.height) + " ft tall");
+    if (num(t.diameter)) parts.push(num(t.diameter) + " in trunk");
+    parts.push("stump: " + stumpLabel(t.stump).toLowerCase());
+    parts.push("wood: " + woodLabelFor(t, bid));
+    parts.push("landing zone: " + landingLabel(t.landing));
+    if (t.location) parts.push("where: " + t.location);
+    if (t.note) parts.push("note: " + t.note);
+    out.push("Tree " + (i + 1) + ": " + (t.species || "Tree") + " \u2014 " + WORK_LABELS[t.work] + " (" + parts.join("; ") + ")");
+    var labels = [];
+    (Array.isArray(t.photoMarks) ? t.photoMarks : []).forEach(function (pm) {
+      if (pm && Array.isArray(pm.shapes)) pm.shapes.forEach(function (sh) { if (sh.label && labels.indexOf(sh.label) < 0) labels.push(sh.label); });
+    });
+    if (labels.length) out.push("Tree " + (i + 1) + " marked photo shows: " + labels.join("; "));
+  });
+  if (calc.disposal > 0) out.push("Debris disposal: " + DISPOSAL_LABELS[bid.disposal]);
+  if (calc.travel > 0) out.push("Travel: " + num(bid.travelMiles) + " miles");
+  if (calc.extras > 0) out.push("Additional expenses: " + money(calc.extras));
+  (bid.items || []).forEach(function (it) {
+    var amt = Math.max(0, num(it.qty, 1)) * Math.max(0, num(it.price));
+    if (amt > 0) out.push((it.name || "Item") + " \u00D7 " + num(it.qty, 1) + " \u2014 " + money(amt));
+  });
+  if (bid.notes) out.push("Notes: " + bid.notes);
+  return out;
+}
+function contractTextHTML(bid, s, frozen) {
+  var company = frozen ? (frozen.company || s.company) : s.company;
+  var scope = frozen ? (frozen.scope || []) : contractScopeLines(bid, s);
+  var price = frozen ? num(frozen.price) : calcBid(bid, s).totalWithTax;
+  var items = scope.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("");
+  return '<div class="ct-title">Tree Work Agreement</div>' +
+    "<p><strong>Contractor:</strong> " + esc(companyIsPlaceholder(company) ? "Your Company" : company) + "</p>" +
+    "<p><strong>Customer:</strong> " + esc(bid.customer || "\u2014") + (bid.address ? "<br>" + esc(bid.address) : "") + "</p>" +
+    "<p><strong>Agreed price:</strong> " + money(price) + "</p>" +
+    "<p><strong>Work to be performed:</strong></p><ul>" + items + "</ul>" +
+    '<div class="ct-terms">' +
+    "<p>1. The contractor will perform the work listed above at the address above.</p>" +
+    "<p>2. Wood, brush, and debris will be handled as described for each tree above, including any bucking, chipping, or haul-away noted there.</p>" +
+    "<p>3. Payment of the agreed price is due in full on completion of the work.</p>" +
+    "<p>4. Work not listed above is not included. Any extra work will be agreed in writing before it starts and charged separately.</p>" +
+    "<p>5. If the customer cancels after work has started, the customer will pay for the work already completed.</p>" +
+    "<p>6. By signing below, the customer agrees to the scope and price above.</p></div>";
+}
+function contractBlockHTML(bid) {
+  var c = bid && bid.contract;
+  if (!c) return "";
+  return '<div class="qcontract"><div><strong>\u2713 Contract signed</strong> \u2014 ' + esc(c.signerName) + " \u00B7 " + esc(c.signDate) + " \u00B7 Agreed price " + money(num(c.price)) + "</div>" +
+    '<img class="qsig" src="' + c.signature + '" alt="Customer signature">' +
+    (c.counterSignature ? '<div style="margin-top:6px">Countersigned: ' + esc(c.counterName || "Contractor") + '</div><img class="qsig" src="' + c.counterSignature + '" alt="Contractor signature">' : "") + "</div>";
+}
+/* ---- signature pads ---- */
+var signPads = {};
+function setupPad(id) {
+  var cv = $(id);
+  if (!cv || signPads[id]) return;
+  var ctx = cv.getContext("2d");
+  var pad = { ink: false, last: null };
+  signPads[id] = pad;
+  function pos(ev) {
+    var r = cv.getBoundingClientRect();
+    return [(ev.clientX - r.left) * (cv.width / Math.max(1, r.width)), (ev.clientY - r.top) * (cv.height / Math.max(1, r.height))];
+  }
+  cv.addEventListener("pointerdown", function (ev) {
+    ev.preventDefault();
+    try { cv.setPointerCapture(ev.pointerId); } catch (e) {}
+    var p = pos(ev);
+    pad.last = p; pad.ink = true;
+    ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(p[0] + 0.1, p[1] + 0.1); ctx.stroke();
+  });
+  cv.addEventListener("pointermove", function (ev) {
+    if (!pad.last) return;
+    ev.preventDefault();
+    var p = pos(ev);
+    ctx.beginPath(); ctx.moveTo(pad.last[0], pad.last[1]); ctx.lineTo(p[0], p[1]); ctx.stroke();
+    pad.last = p;
+  });
+  function end() { pad.last = null; }
+  cv.addEventListener("pointerup", end);
+  cv.addEventListener("pointercancel", end);
+}
+function sizePad(id) {
+  var cv = $(id);
+  if (!cv) return;
+  var w = cv.clientWidth || 340;
+  cv.width = Math.max(300, Math.round(w * 2));
+  cv.height = 300;
+  var ctx = cv.getContext("2d");
+  ctx.lineWidth = 3.4; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#14231b";
+}
+function clearPad(id) {
+  var cv = $(id);
+  if (!cv) return;
+  cv.getContext("2d").clearRect(0, 0, cv.width, cv.height);
+  if (signPads[id]) signPads[id].ink = false;
+}
+function padImage(id) {
+  var cv = $(id);
+  var out = document.createElement("canvas");
+  out.width = cv.width; out.height = cv.height;
+  var ctx = out.getContext("2d");
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, out.width, out.height);
+  ctx.drawImage(cv, 0, 0);
+  return out.toDataURL("image/png");
+}
+/* ---- contract overlay flow ---- */
+function openContract(view) {
+  readBidForm();
+  var c = current.contract;
+  if (view && !c) { toast("No signed contract on this bid yet"); return; }
+  $("contractText").innerHTML = contractTextHTML(current, settings, view ? c : null);
+  $("signArea").style.display = view ? "none" : "";
+  $("viewArea").style.display = view ? "" : "none";
+  $("contractSaveBtn").style.display = view ? "none" : "";
+  if (view) {
+    $("contractViewSig").src = c.signature;
+    $("contractViewMeta").innerHTML = "Signed by <strong>" + esc(c.signerName) + "</strong> on " + esc(c.signDate) +
+      " \u00B7 Agreed price " + money(num(c.price)) +
+      (c.counterSignature ? '<p style="margin:10px 0 4px">Countersigned by <strong>' + esc(c.counterName || "Contractor") + '</strong></p><img class="sig-img" src="' + c.counterSignature + '" alt="Contractor signature">' : "");
+  } else {
+    $("signName").value = current.customer || "";
+    $("signDate").value = todayStr();
+    $("counterToggle").checked = false;
+    $("counterArea").style.display = "none";
+    $("counterName").value = companyIsPlaceholder(settings.company) ? "" : (settings.company || "");
+  }
+  $("contractOverlay").classList.add("open");
+  if (!view) { sizePad("signPad"); sizePad("counterPad"); clearPad("signPad"); clearPad("counterPad"); }
+}
+function closeContract() { $("contractOverlay").classList.remove("open"); }
+function saveSignedContract() {
+  var name = $("signName").value.trim();
+  if (!name) { toast("Add the customer's printed name first"); $("signName").focus(); return; }
+  if (!signPads.signPad || !signPads.signPad.ink) { toast("Have the customer sign in the box first"); return; }
+  var calc = calcBid(current, settings);
+  var counterOn = $("counterToggle").checked;
+  current.contract = {
+    signerName: name,
+    signDate: $("signDate").value || todayStr(),
+    signedAt: new Date().toISOString(),
+    signature: padImage("signPad"),
+    counterName: counterOn ? $("counterName").value.trim() : "",
+    counterSignature: (counterOn && signPads.counterPad && signPads.counterPad.ink) ? padImage("counterPad") : "",
+    price: Math.round(calc.totalWithTax * 100) / 100,
+    company: settings.company || "",
+    scope: contractScopeLines(current, settings)
+  };
+  closeContract();
+  saveCurrentBid();
+  renderQuote();
+  toast("Contract signed & saved with this bid");
+}
+function renderContractPanel() {
+  var st = $("contractStatus"), sb = $("contractSignBtn"), vb = $("contractViewBtn");
+  if (!st || !current) return;
+  var c = current.contract;
+  if (c) {
+    st.innerHTML = "\u2713 <strong>Contract signed</strong> by " + esc(c.signerName) + " on " + esc(c.signDate) + " \u00B7 agreed price " + money(num(c.price));
+    sb.textContent = "\u270D\uFE0F Re-sign / replace signature";
+    vb.style.display = "";
+  } else {
+    st.textContent = "Contract: not signed yet. When the customer accepts the quote, tap below and have them sign right on your phone \u2014 it saves with this bid.";
+    sb.textContent = "\u270D\uFE0F Get customer signature";
+    vb.style.display = "none";
+  }
+}
+function wireContract() {
+  setupPad("signPad");
+  setupPad("counterPad");
+  $("contractSignBtn").addEventListener("click", function () { openContract(false); });
+  $("contractViewBtn").addEventListener("click", function () { openContract(true); });
+  $("contractCancelBtn").addEventListener("click", function () { closeContract(); });
+  $("contractSaveBtn").addEventListener("click", function () { saveSignedContract(); });
+  $("signClearBtn").addEventListener("click", function () { clearPad("signPad"); });
+  $("counterClearBtn").addEventListener("click", function () { clearPad("counterPad"); });
+  $("counterToggle").addEventListener("change", function () {
+    $("counterArea").style.display = this.checked ? "" : "none";
+    if (this.checked) { sizePad("counterPad"); clearPad("counterPad"); }
+  });
+}
+
 /* ---- trees ---- */
 function renderTrees() {
   var wrap = $("treeList"); wrap.innerHTML = "";
@@ -904,8 +1425,11 @@ function renderTrees() {
     }).join("");
     var photos = Array.isArray(t.photos) ? t.photos : [];
     var photoThumbs = photos.map(function (ph, j) {
-      return '<div class="tree-thumb-wrap"><img class="tree-thumb" data-thumb="' + i + '-' + j + '" src="' + ph + '" alt="Photo of tree ' + (i + 1) + '">' +
+      var marked = Array.isArray(t.photoMarks) && t.photoMarks[j];
+      return '<div class="tree-thumb-wrap"><img class="tree-thumb" data-thumb="' + i + '-' + j + '" src="' + photoDisplaySrc(t, j) + '" alt="Photo of tree ' + (i + 1) + '">' +
+        (marked ? '<span class="marked-badge">✓ Tree marked</span>' : "") +
         '<span class="tree-thumb-btns">' +
+        '<button type="button" class="btn secondary small" data-photomark="' + i + '" data-photoindex="' + j + '">' + (marked ? "✏️ Edit marks" : "⭕ Mark the tree") + '</button>' +
         '<button type="button" class="btn danger small" data-photoremove="' + i + '" data-photoindex="' + j + '">Remove</button>' +
         '<label class="btn ghost small photo-add" for="photo-replace-' + i + '-' + j + '">Replace</label>' +
         '<input type="file" accept="image/*" id="photo-replace-' + i + '-' + j + '" data-photoreplaceinput="' + i + '" data-photoindex="' + j + '" style="display:none">' +
@@ -1153,6 +1677,7 @@ function quoteHTML(bid, s) {
     '<tr><td style="border-bottom:none;padding-top:12px"><strong>Total</strong></td><td class="r qtotal" style="border-bottom:none;padding-top:12px">' + money(calc.totalWithTax) + "</td></tr></tbody></table>" +
     (bid.notes ? '<div style="margin-top:12px;font-size:13px"><strong>Notes:</strong> ' + esc(bid.notes) + "</div>" : "") +
     '<div class="qterms">' + esc(bid.terms || DEFAULT_TERMS) + "</div>" +
+    contractBlockHTML(bid) +
     '<div style="margin-top:16px;font-size:12.5px;color:#5c6a62">Thank you for the opportunity to quote your tree work.</div></div>';
 }
 function quoteHTMLFromSnapshot(bid) {
@@ -1172,6 +1697,7 @@ function quoteHTMLFromSnapshot(bid) {
     '<tr><td style="border-bottom:none;padding-top:12px"><strong>Total</strong></td><td class="r qtotal" style="border-bottom:none;padding-top:12px">' + money(num(snap.totalWithTax)) + "</td></tr></tbody></table>" +
     (bid.notes ? '<div style="margin-top:12px;font-size:13px"><strong>Notes:</strong> ' + esc(bid.notes) + "</div>" : "") +
     '<div class="qterms">' + esc(bid.terms || DEFAULT_TERMS) + "</div>" +
+    contractBlockHTML(bid) +
     '<div style="margin-top:16px;font-size:12.5px;color:#5c6a62">Thank you for the opportunity to quote your tree work.</div></div>';
 }
 function renderQuote() {
@@ -1179,6 +1705,7 @@ function renderQuote() {
   var html = quoteHTML(current, settings);
   $("quotePreview").innerHTML = html;
   $("quotePrint").innerHTML = html;
+  renderContractPanel();
   renderSendPanel();
 }
 
@@ -1408,10 +1935,15 @@ function init() {
     if (f === "height" || f === "diameter") { /* keep user's hours; don't override */ refreshPricing(); }
   });
   $("treeList").addEventListener("click", function (e) {
+    if (e.target.dataset && e.target.dataset.photomark !== undefined) {
+      openMarkEditor(+e.target.dataset.photomark, +e.target.dataset.photoindex);
+      return;
+    }
     if (e.target.dataset && e.target.dataset.photoremove !== undefined) {
       var pt = current.trees[+e.target.dataset.photoremove];
       if (pt && Array.isArray(pt.photos)) {
         pt.photos.splice(+e.target.dataset.photoindex, 1);
+        if (Array.isArray(pt.photoMarks)) pt.photoMarks.splice(+e.target.dataset.photoindex, 1);
         bidDirty = true; priceDirty = true; renderTrees(); refreshPricing(); toast("Photo removed");
       }
       return;
@@ -1425,6 +1957,8 @@ function init() {
       current.trees.splice(+i, 1); renderTrees(); refreshPricing();
     }
   });
+  wireMarkEditor();
+  wireContract();
   $("addTreeBtn").addEventListener("click", function () {
     bidDirty = true; priceDirty = true;
     var t = blankTree(); t.hours = suggestedHours(t);
@@ -1508,7 +2042,7 @@ function init() {
       var src = bids.find(function (x) { return x.id === el.dataset.dup; });
       if (src) {
         var dup = JSON.parse(JSON.stringify(src));
-        dup.id = uid(); dup.status = "open"; dup.savedAt = new Date().toISOString(); delete dup.closeout; /* the copy is a new bid — it has not been worked yet */
+        dup.id = uid(); dup.status = "open"; dup.savedAt = new Date().toISOString(); delete dup.closeout; delete dup.contract; /* the copy is a new bid — it has not been worked or signed yet */
         if (dup.customer && !/\(copy\)$/.test(dup.customer)) dup.customer += " (copy)";
         bids.unshift(dup); persistBids(); renderSaved(); toast("Bid duplicated");
       }
