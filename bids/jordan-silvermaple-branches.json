@@ -1,0 +1,72 @@
+{
+  "address": "1427 Orchard Dr, Grove, OK",
+  "closeout": null,
+  "crewSize": 1,
+  "customer": "Tom Jordan",
+  "date": "2026-11-18",
+  "depositAmt": 0,
+  "disposal": "haul",
+  "email": "",
+  "extras": 0,
+  "id": "jordan-silvermaple-branches-2026-11-18",
+  "internalNotes": "SMS lead (+1 479-372-0926), time confirmed Nov 17. Bid visit Wed Nov 18, ~3 PM (moved from 2 PM at the customer's request). Travis on site Nov 18 confirmed a rented lift is required \u2014 dead wood over the house; the customer himself said he would not trust climbing the top. Price set with Travis on site Nov 18: $1,400 for both branches completely removed INCLUDING haul-off of all wood and debris (Travis confirmed haul-off at this price). Customer did NOT offer to help cut up debris \u2014 do not assume help. Height ~40 ft per the customer; trunk diameter not measured (24 in is a placeholder). Scope is branch removal only \u2014 NOT a topping and NOT a full tree removal.",
+  "items": [],
+  "notes": "Silver maple at 1427 Orchard Dr, Grove. Two large branches removed completely: (1) the dead branch coming down over the house, and (2) the large branch on the back side of the tree. This is not a topping \u2014 both branches come off whole. All work is done from a lift. Price includes cutting both branches down, clean-up, and hauling all wood and debris off.",
+  "payMethod": "",
+  "payStatus": "unpaid",
+  "phone": "479-372-0926",
+  "savedAt": "2026-11-18T21:48:00.000Z",
+  "snapshot": {
+    "company": "White Wolf Tree Service LLC",
+    "email": "whitewolfoklahoma@gmail.com",
+    "lines": [
+      {
+        "amount": 800,
+        "desc": "Silver Maple \u2014 Branch Removal (over house)",
+        "detail": "Dead branch over the roof removed completely from a lift, pieced down in small sections",
+        "photo": "",
+        "photos": []
+      },
+      {
+        "amount": 600,
+        "desc": "Silver Maple \u2014 Branch Removal (back side)",
+        "detail": "Large back-side branch removed completely from the same lift setup",
+        "photo": "",
+        "photos": []
+      }
+    ],
+    "phone": "918-691-1542",
+    "recommended": 1400,
+    "savedAt": "2026-11-18T21:48:00.000Z",
+    "taxAmt": 0,
+    "taxEnabled": false,
+    "taxRate": 8.5,
+    "totalWithTax": 1400
+  },
+  "status": "open",
+  "terms": "Quote valid for 30 days. Price includes the work listed above only; additional work will be quoted separately. Stump grinding is included only where listed. Payment due in full on completion unless other arrangements are made in writing before work begins. We are not responsible for damage to underground utilities, irrigation, or septic systems not marked by the property owner before work begins.",
+  "total": 1400,
+  "travelMiles": 0,
+  "trees": [
+    {
+      "access": "standard",
+      "diameter": 24,
+      "hazards": {
+        "dead": true,
+        "leaning": false,
+        "power": false,
+        "structure": true
+      },
+      "height": 40,
+      "hours": 5,
+      "landing": "none",
+      "location": "Over the house and back side of the tree",
+      "note": "Two large branches removed completely \u2014 no topping. All work from a lift.",
+      "photos": [],
+      "species": "Silver Maple",
+      "stump": "none",
+      "wood": "",
+      "work": "trim"
+    }
+  ]
+}
